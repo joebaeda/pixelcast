@@ -3,11 +3,11 @@
 import { useState, useRef, useEffect } from 'react';
 import PixelGrid from './PixelGrid';
 import ToolBar from './ToolBar';
-import { useAccount, useBalance, useChainId, useWaitForTransactionReceipt, useWriteContract } from 'wagmi';
+import { useChainId, useWaitForTransactionReceipt, useWriteContract } from 'wagmi';
 import sdk from '@farcaster/frame-sdk';
 import { pixelCastAbi, pixelCastAddress } from '@/lib/contract';
 import { base } from 'wagmi/chains';
-import { parseEther, formatEther } from 'viem';
+import { parseEther } from 'viem';
 import Header from './Header';
 import Footer from './Footer';
 
@@ -23,10 +23,6 @@ const PixelCast = ({ fid, username, pfp }: IProfile) => {
 
   const chainId = useChainId();
   const { data: hash, isPending, writeContract } = useWriteContract();
-  const { address } = useAccount()
-  const balance = useBalance({
-    address: address,
-  })
 
   const { isLoading: isConfirming, isSuccess: isConfirmed } = useWaitForTransactionReceipt({ hash });
 
@@ -129,7 +125,7 @@ const PixelCast = ({ fid, username, pfp }: IProfile) => {
   return (
     <div className="bg-gray-50">
       <header>
-        <Header username={username} pfp={pfp} balance={parseFloat(formatEther(balance.data?.value as bigint)).toFixed(3)} />
+        <Header username={username} pfp={pfp} balance={"0"} />
       </header>
       <main className="flex p-4 min-h-screen items-center justify-center">
         <PixelGrid
