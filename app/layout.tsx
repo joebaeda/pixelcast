@@ -11,7 +11,7 @@ const frame = {
       type: "launch_frame",
       name: "Pixel Cast",
       url: "https://pixelcast.vercel.app/og-image.jpg",
-      splashImageUrl: "https://pixelcast.vercel.app/splash.png",
+      splashImageUrl: "https://pixelcast.vercel.app/splash.svg",
       splashBackgroundColor: "#ede4ca",
     },
   },

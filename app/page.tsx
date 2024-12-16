@@ -8,6 +8,7 @@ import { Redirect } from './components/Redirect';
 import sdk, { FrameContext } from '@farcaster/frame-sdk';
 import { useAccount, useBalance } from 'wagmi';
 import { formatEther } from 'viem'
+import Loading from './components/Loading';
 
 export default function Home() {
 
@@ -32,26 +33,24 @@ export default function Home() {
   }, [isSDKLoaded]);
 
   if (!isSDKLoaded) {
-    return <div></div>;
+    return <Loading />;
+  }
+
+  if (!context) {
+    return <Redirect />
   }
 
   return (
-    <>
-      {address && context?.user.fid ? (
-        <div className="bg-gray-50">
-          <header>
-            <Header username={context.user.username as string} pfp={context.user.pfpUrl as string} balance={parseFloat(formatEther(balance.data?.value as bigint)).toFixed(3)} />
-          </header>
-          <main className="flex p-4 min-h-screen items-center justify-center">
-            <PixelCast fid={context.user.fid} username={context.user.username as string} />
-          </main>
-          <footer>
-            <Footer />
-          </footer>
-        </div>
-      ) : (
-        <Redirect />
-      )}
-    </>
+    <div className="bg-gray-50">
+      <header>
+        <Header username={context.user.username as string} pfp={context.user.pfpUrl as string} balance={parseFloat(formatEther(balance.data?.value as bigint)).toFixed(3)} />
+      </header>
+      <main className="flex p-4 min-h-screen items-center justify-center">
+        <PixelCast fid={context.user.fid as number} username={context.user.username as string} />
+      </main>
+      <footer>
+        <Footer />
+      </footer>
+    </div>
   )
 }
