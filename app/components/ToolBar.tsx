@@ -85,46 +85,46 @@ const ToolBar = ({
       <div className="fixed rounded-t-2xl mx-auto bottom-0 left-0 right-0 bg-[#281537] shadow-md p-4">
         <div className="flex mx-auto flex-row justify-between items-center space-x-4">
 
-          <div className="flex flex-col space-y-2 items-center">
+          <div className="flex flex-col space-y-1 items-center">
             <button
               disabled={chainId !== baseId || isPending}
               onClick={() => setShowColorPicker(true)}
-              className="p-2 rounded-full disabled:opacity-50"
+              className="rounded-full disabled:opacity-50"
             >
-              <Palette className="w-6 h-6" />
+              <Palette className="w-6 h-6 text-gray-200" />
             </button>
             <p className="text-gray-200 text-sm font-bold">Color</p>
           </div>
 
-          <div className="flex flex-col space-y-2 items-center">
+          <div className="flex flex-col space-y-1 items-center">
             <button
               disabled={chainId !== baseId || isPending}
               onClick={onCastImage}
-              className="rounded-full"
+              className="rounded-full disabled:opacity-50"
             >
-              <CastButton className="w-10 h-10" />
+              <CastButton className="w-6 h-6" />
             </button>
             <p className="text-gray-200 text-sm font-bold">Cast</p>
           </div>
 
-          <div className="flex flex-col space-y-2 items-center">
+          <div className="flex flex-col space-y-1 items-center">
             <button
               disabled={chainId !== baseId || isPending}
               onClick={onBaseImage}
-              className="rounded-full"
+              className="rounded-full disabled:opacity-50"
             >
-              <BaseButton className="w-10 h-10" />
+              <BaseButton className="w-6 h-6" />
             </button>
             <p className="text-gray-200 text-sm font-bold">Mint</p>
           </div>
 
-          <div className="flex flex-col space-y-2 items-center">
+          <div className="flex flex-col space-y-1 items-center">
             <button
               disabled={chainId !== baseId || isPending}
               onClick={onClearCanvas}
-              className="p-2 rounded-full"
+              className="rounded-full disabled:opacity-50"
             >
-              <Trash2 className="w-6 h-6" />
+              <Trash2 className="w-6 h-6 text-gray-200" />
             </button>
             <p className="text-gray-200 text-sm font-bold">Delete</p>
           </div>

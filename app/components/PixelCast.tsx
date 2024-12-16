@@ -9,7 +9,6 @@ import { pixelCastAbi, pixelCastAddress } from '@/lib/contract';
 import { base } from 'wagmi/chains';
 import { parseEther } from 'viem';
 import Header from './Header';
-import Footer from './Footer';
 
 interface IProfile {
   fid: number
@@ -126,9 +125,9 @@ const PixelCast = ({ fid, username, pfp }: IProfile) => {
   return (
     <div className="bg-gray-50">
       <header>
-        <Header username={username} pfp={pfp} balance={"0"} />
+        <Header username={username} pfp={pfp} />
       </header>
-      <main className="flex p-4 min-h-screen items-center justify-center">
+      <main className="fixed px-4 inset-0 flex justify-center items-center">
         <PixelGrid
           gridSize={{ width: 48, height: 48 }}
           selectedColor={selectedColor}
@@ -147,9 +146,6 @@ const PixelCast = ({ fid, username, pfp }: IProfile) => {
           onBaseImage={handleMint}
         />
       </main>
-      <footer>
-        <Footer />
-      </footer>
     </div>
   );
 };

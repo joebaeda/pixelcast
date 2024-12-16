@@ -79,7 +79,7 @@ const PixelGrid = ({ gridSize, selectedColor, canvasRef }: PixelGridProps) => {
   }
 
   return (
-    <div className="w-full max-w-[384px] aspect-square mx-auto">
+    <div className="w-full max-w-[384px] bg-gray-200 aspect-square mx-auto">
       <canvas
         ref={canvasRef}
         className="w-full h-full block border border-gray-300 touch-none select-none"
