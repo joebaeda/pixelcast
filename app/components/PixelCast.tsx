@@ -9,7 +9,12 @@ import { pixelCastAbi, pixelCastAddress } from '@/lib/contract';
 import { base } from 'wagmi/chains';
 import { parseEther } from 'viem';
 
-const PixelCast = () => {
+interface IProfile {
+  fid: number
+  username: string
+}
+
+const PixelCast = ({fid, username}: IProfile) => {
   const [selectedColor, setSelectedColor] = useState('#000000');
   const canvasRef = useRef<HTMLCanvasElement>(null!);
 
@@ -57,7 +62,7 @@ const PixelCast = () => {
       const response = await fetch('/api/send-notify', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ title, body }),
+        body: JSON.stringify({fid, title, body }),
       });
 
       const result = await response.json();
@@ -100,7 +105,7 @@ const PixelCast = () => {
       const dataURL = canvas.toDataURL('image/png');
       const blob = await fetch(dataURL).then((res) => res.blob());
       const formData = new FormData();
-      formData.append('file', blob, 'pixelcast.png');
+      formData.append('file', blob, username);
 
       try {
         const response = await fetch('/api/upload', { method: 'POST', body: formData });
