@@ -13,11 +13,11 @@ const Header = ({ username, pfp, balance }: IHeader) => {
             <div className="flex text-gray-200 mx-auto flex-row justify-between items-center space-x-4">
                 <div className="flex space-x-2 items-center">
                     <Ethereum className="w-10 h-10" />
-                    <p className="font-bold"> {balance || "0.00"}</p>
+                    <p className="font-bold"> {balance}</p>
                 </div>
                 <div className="flex space-x-2 items-center">
-                    <Image className="object-cover w-10 h-10 rounded-full" src={pfp || "/splash.png"} alt={username} width={35} height={35} priority />
-                    <p className="font-bold pr-3">{username || "Joe bae"}</p>
+                    <Image className="object-cover w-10 h-10 rounded-full" src={pfp} alt={username} width={35} height={35} priority />
+                    <p className="font-bold pr-3">{username}</p>
                 </div>
             </div>
         </div>

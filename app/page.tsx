@@ -30,7 +30,7 @@ export default function Home() {
 
   return (
     <>
-      {context?.user.fid ?
+      {context?.client.clientFid ?
         <PixelCast fid={context.user.fid as number} username={context.user.username as string} pfp={context.user.pfpUrl as string} />
         : <Redirect />
       }

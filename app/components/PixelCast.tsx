@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import PixelGrid from './PixelGrid';
 import ToolBar from './ToolBar';
 import { useChainId, useWaitForTransactionReceipt, useWriteContract } from 'wagmi';
@@ -27,7 +27,7 @@ const PixelCast = ({ fid, username, pfp }: IProfile) => {
   const { isLoading: isConfirming, isSuccess: isConfirmed } = useWaitForTransactionReceipt({ hash });
 
   // Handle casting an image (to Farcaster and notify user)
-  const handleCast = async () => {
+  const handleCast = useCallback(async () => {
     const ipfsHash = await handleSaveImage();
     if (ipfsHash) {
       sdk.actions.openUrl(
@@ -38,7 +38,8 @@ const PixelCast = ({ fid, username, pfp }: IProfile) => {
     } else {
       console.error("Failed to send cast.");
     }
-  };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  },[]);
 
   // Handle minting a token with an image
   const handleMint = async () => {
