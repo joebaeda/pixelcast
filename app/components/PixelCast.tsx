@@ -3,23 +3,30 @@
 import { useState, useRef, useEffect } from 'react';
 import PixelGrid from './PixelGrid';
 import ToolBar from './ToolBar';
-import { useChainId, useWaitForTransactionReceipt, useWriteContract } from 'wagmi';
+import { useAccount, useBalance, useChainId, useWaitForTransactionReceipt, useWriteContract } from 'wagmi';
 import sdk from '@farcaster/frame-sdk';
 import { pixelCastAbi, pixelCastAddress } from '@/lib/contract';
 import { base } from 'wagmi/chains';
-import { parseEther } from 'viem';
+import { parseEther, formatEther } from 'viem';
+import Header from './Header';
+import Footer from './Footer';
 
 interface IProfile {
   fid: number
   username: string
+  pfp: string
 }
 
-const PixelCast = ({fid, username}: IProfile) => {
+const PixelCast = ({ fid, username, pfp }: IProfile) => {
   const [selectedColor, setSelectedColor] = useState('#000000');
   const canvasRef = useRef<HTMLCanvasElement>(null!);
 
   const chainId = useChainId();
   const { data: hash, isPending, writeContract } = useWriteContract();
+  const { address } = useAccount()
+  const balance = useBalance({
+    address: address,
+  })
 
   const { isLoading: isConfirming, isSuccess: isConfirmed } = useWaitForTransactionReceipt({ hash });
 
@@ -63,7 +70,7 @@ const PixelCast = ({fid, username}: IProfile) => {
         method: "POST",
         mode: "same-origin",
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({fid, title, body }),
+        body: JSON.stringify({ fid, title, body }),
       });
 
       const result = await response.json();
@@ -120,24 +127,32 @@ const PixelCast = ({fid, username}: IProfile) => {
   };
 
   return (
-    <div className="bg-gray-100">
-      <PixelGrid
-        gridSize={{ width: 48, height: 48 }}
-        selectedColor={selectedColor}
-        canvasRef={canvasRef}
-      />
-      <ToolBar
-        selectedColor={selectedColor}
-        chainId={chainId}
-        baseId={base.id}
-        isPending={isPending}
-        isConfirming={isConfirming}
-        isConfirmed={isConfirmed}
-        onColorChange={handleColorChange}
-        onClearCanvas={handleClearCanvas}
-        onCastImage={handleCast}
-        onBaseImage={handleMint}
-      />
+    <div className="bg-gray-50">
+      <header>
+        <Header username={username} pfp={pfp} balance={parseFloat(formatEther(balance.data?.value as bigint)).toFixed(3)} />
+      </header>
+      <main className="flex p-4 min-h-screen items-center justify-center">
+        <PixelGrid
+          gridSize={{ width: 48, height: 48 }}
+          selectedColor={selectedColor}
+          canvasRef={canvasRef}
+        />
+        <ToolBar
+          selectedColor={selectedColor}
+          chainId={chainId}
+          baseId={base.id}
+          isPending={isPending}
+          isConfirming={isConfirming}
+          isConfirmed={isConfirmed}
+          onColorChange={handleColorChange}
+          onClearCanvas={handleClearCanvas}
+          onCastImage={handleCast}
+          onBaseImage={handleMint}
+        />
+      </main>
+      <footer>
+        <Footer />
+      </footer>
     </div>
   );
 };
