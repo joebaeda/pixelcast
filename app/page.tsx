@@ -28,7 +28,7 @@ export default function Home() {
     return <Loading />
   }
 
-  if (!context) {
+  if (!context?.client.clientFid) {
     return <Redirect />
   }
 
