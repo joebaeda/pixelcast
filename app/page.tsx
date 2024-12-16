@@ -39,23 +39,23 @@ export default function Home() {
     return <div></div>;
   }
 
-  if (!context?.user.fid) {
-    return (
-      <Redirect />
-    );
-  }
-
   return (
-    <div className="bg-gray-50">
-      <header>
-        <Header username={context.user.username as string} pfp={context.user.pfpUrl as string} balance={parseFloat(formatEther(balance.data?.value as bigint)).toFixed(3)} />
-      </header>
-      <main className="flex p-4 min-h-screen items-center justify-center">
-        <PixelCast />
-      </main>
-      <footer>
-        <Footer />
-      </footer>
-    </div>
+    <>
+      {address && context?.user.fid ? (
+        <div className="bg-gray-50">
+          <header>
+            <Header username={context.user.username as string} pfp={context.user.pfpUrl as string} balance={parseFloat(formatEther(balance.data?.value as bigint)).toFixed(3)} />
+          </header>
+          <main className="flex p-4 min-h-screen items-center justify-center">
+            <PixelCast />
+          </main>
+          <footer>
+            <Footer />
+          </footer>
+        </div>
+      ) : (
+        <Redirect />
+      )}
+    </>
   )
 }
