@@ -23,12 +23,6 @@ export default function Home() {
     load();
   }, [isSDKLoaded]);
 
-  useEffect(() => {
-    if (!context?.client.added) {
-      sdk.actions.addFrame()
-    }
-  },[context?.client.added])
-
   if (!isSDKLoaded) {
     return <Redirect />
   }
