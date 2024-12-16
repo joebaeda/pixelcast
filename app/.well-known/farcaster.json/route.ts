@@ -9,7 +9,7 @@ export async function GET() {
     frame: {
       version: "0.0.1",
       name: "Pixel Cast",
-      iconUrl: "https://pixelcast.vercel.app/pixelcast.png",
+      iconUrl: "https://pixelcast.vercel.app/splash.png",
       splashImageUrl: "https://pixelcast.vercel.app/splash.svg",
       splashBackgroundColor: "#ede4ca",
       homeUrl: "https://pixelcast.vercel.app",
