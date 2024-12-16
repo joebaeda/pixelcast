@@ -13,23 +13,27 @@ export default function Home() {
 
   useEffect(() => {
     const load = async () => {
-      const frameContext = await sdk.context;
-      setContext(frameContext);
-      if (frameContext) {
-        sdk.actions.ready()
-        setIsSDKLoaded(true)
-        sdk.actions.addFrame()
-      }
+      setContext(await sdk.context);
+      sdk.actions.ready({});
+    };
+
+    if (sdk && !isSDKLoaded) {
+      setIsSDKLoaded(true);
+      load();
     }
-    load();
-  }, []);
+
+  }, [isSDKLoaded]);
 
   if (!isSDKLoaded) {
-    return <Redirect />
+    return <Loading />
   }
 
   if (!context) {
-    return <Loading />
+    return <Redirect />
+  }
+
+  if (!context.client.added) {
+    sdk.actions.addFrame()
   }
 
   return (

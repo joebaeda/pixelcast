@@ -10,7 +10,7 @@ export async function GET() {
       version: "0.0.1",
       name: "Pixel Cast",
       iconUrl: "https://pixelcast.vercel.app/splash.png",
-      splashImageUrl: "https://pixelcast.vercel.app/splash.svg",
+      splashImageUrl: "https://pixelcast.vercel.app/splash.png",
       splashBackgroundColor: "#ede4ca",
       homeUrl: "https://pixelcast.vercel.app",
       webhookUrl: "https://pixelcast.vercel.app/api/webhook"
