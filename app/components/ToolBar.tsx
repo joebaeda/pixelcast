@@ -99,7 +99,7 @@ const ToolBar = ({
           <div className="flex flex-col space-y-1 items-center">
             <button
               disabled={chainId !== baseId || isPending}
-              onClick={onCastImage}
+              onClick={() => onCastImage()}
               className="rounded-full disabled:opacity-50"
             >
               <CastButton className="w-6 h-6" />
@@ -110,7 +110,7 @@ const ToolBar = ({
           <div className="flex flex-col space-y-1 items-center">
             <button
               disabled={chainId !== baseId || isPending}
-              onClick={onBaseImage}
+              onClick={() => onBaseImage()}
               className="rounded-full disabled:opacity-50"
             >
               <BaseButton className="w-6 h-6" />

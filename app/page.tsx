@@ -24,14 +24,14 @@ export default function Home() {
   }, [isSDKLoaded]);
 
   if (!isSDKLoaded) {
-    return <Loading />
+    return <Redirect />
   }
 
   return (
     <>
       {context?.client.added ?
         <PixelCast fid={context.user.fid as number} username={context.user.username as string} pfp={context.user.pfpUrl as string} />
-        : <Redirect />
+        : <Loading />
       }
     </>
   )

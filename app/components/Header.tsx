@@ -17,7 +17,7 @@ const Header = ({ username, pfp }: IHeader) => {
                 <Ethereum className="w-10 h-10" />
             </div>
             <div className="flex space-x-2 items-center">
-                <Image className="object-cover w-10 h-10 rounded-full" src={pfp as string} alt={username as string} width={35} height={35} priority />
+                <Image className="object-cover w-6 h-6 rounded-full" src={pfp as string} alt={username as string} width={35} height={35} priority />
                 <p className="font-bold pr-3">{username}</p>
             </div>
         </div>
