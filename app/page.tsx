@@ -5,7 +5,7 @@ import Footer from './components/Footer'
 import Header from './components/Header'
 import PixelCast from './components/PixelCast'
 import { Redirect } from './components/Redirect';
-import sdk, { FrameContext, SendNotificationRequest } from '@farcaster/frame-sdk';
+import sdk, { FrameContext } from '@farcaster/frame-sdk';
 import { useAccount, useBalance } from 'wagmi';
 import { formatEther } from 'viem'
 
@@ -31,53 +31,19 @@ export default function Home() {
     }
   }, [isSDKLoaded]);
 
-  useEffect(() => {
-    if (!context?.client.added) {
-      const addFrame = async () => {
-        try {
-
-          const result = await sdk.actions.addFrame();
-
-          if (result.added) {
-            if (result.notificationDetails) {
-              await fetch(result.notificationDetails.url, {
-                method: "POST",
-                headers: {
-                  "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                  notificationId: crypto.randomUUID(),
-                  title: "Welcome to Pixel Cast Frame!",
-                  body: "Pixel Cast Frame is now added to your client",
-                  targetUrl: "https://pixelcast.vercel.app",
-                  tokens: [result.notificationDetails.token],
-                } satisfies SendNotificationRequest),
-              });
-            }
-          } else {
-            console.log(`Not added: ${result.reason}`);
-          }
-        } catch (error) {
-          console.log(`Error: ${error}`);
-        }
-      }
-      addFrame()
-    }
-  }, [context])
-
   if (!isSDKLoaded) {
     return <div></div>;
   }
 
   return (
     <>
-      {address && context?.client.clientFid ? (
+      {address && context?.client.added ? (
         <div className="bg-gray-50">
           <header>
             <Header username={context.user.username as string} pfp={context.user.pfpUrl as string} balance={parseFloat(formatEther(balance.data?.value as bigint)).toFixed(3)} />
           </header>
           <main className="flex p-4 min-h-screen items-center justify-center">
-            <PixelCast fid={context.client.clientFid} username={context.user.username as string} />
+            <PixelCast fid={context.user.fid} username={context.user.username as string} />
           </main>
           <footer>
             <Footer />
