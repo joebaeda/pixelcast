@@ -3,77 +3,112 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import PixelGrid from './PixelGrid';
 import ToolBar from './ToolBar';
-import { useChainId, useWaitForTransactionReceipt, useWriteContract } from 'wagmi';
+import Header from './Header';
+import { useWaitForTransactionReceipt, useWriteContract } from 'wagmi';
 import sdk from '@farcaster/frame-sdk';
 import { pixelCastAbi, pixelCastAddress } from '@/lib/contract';
 import { base } from 'wagmi/chains';
 import { parseEther } from 'viem';
-import Header from './Header';
 
 interface IProfile {
-  fid: number
-  username: string
-  pfp: string
+  fid: number;
+  username: string;
+  pfp: string;
 }
 
 const PixelCast = ({ fid, username, pfp }: IProfile) => {
   const [selectedColor, setSelectedColor] = useState('#000000');
   const canvasRef = useRef<HTMLCanvasElement>(null!);
 
-  const chainId = useChainId();
+  // Wagmi hooks
   const { data: hash, isPending, writeContract } = useWriteContract();
-
   const { isLoading: isConfirming, isSuccess: isConfirmed } = useWaitForTransactionReceipt({ hash });
 
-  // Handle casting an image (to Farcaster and notify user)
-  const handleCast = useCallback(async () => {
-    const ipfsHash = await handleSaveImage();
-    if (ipfsHash) {
-      sdk.actions.openUrl(
-        `https://warpcast.com/~/compose?text=This%20is%20really%20cool%20-%20Frame%20by%20@joebaeda&embeds[]=https://gateway.pinata.cloud/ipfs/${ipfsHash}`
-      );
+  
 
-      await notifyUser("Congratulations 🎉", "One pixel cast has been successfully sent to your timeline.");
-    } else {
-      console.error("Failed to send cast.");
-    }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  },[]);
-
-  // Handle minting a token with an image
-  const handleMint = async () => {
-    const ipfsHash = await handleSaveImage();
-    if (ipfsHash) {
-      writeContract({
-        abi: pixelCastAbi,
-        chainId: base.id,
-        address: pixelCastAddress,
-        functionName: 'mint',
-        value: parseEther('0.001'),
-        args: [`ipfs://${ipfsHash}`],
-      });
-
-      await notifyUser("Congratulations 🎉", "One Pixel Cast has been minted on the Base Network.");
-    } else {
-      console.error("Failed to upload drawing to IPFS.");
-    }
-  };
-
-  // Notify user via API
-  const notifyUser = async (title: string, body: string) => {
+  // Notify user
+  const notifyUser = useCallback(async (title: string, body: string) => {
     try {
       const response = await fetch('/api/send-notify', {
-        method: "POST",
-        mode: "same-origin",
+        method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ fid, title, body }),
       });
 
-      const result = await response.json();
-      if (!response.ok) throw new Error(result.error || 'An error occurred');
-      return result;
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Notification failed.');
+      }
     } catch (error) {
-      console.error("Notification API error:", error);
+      console.error("Notification error:", error);
+    }
+  }, [fid]);
+
+  // Save image to IPFS
+  const handleSaveImage = useCallback(async (): Promise<string | undefined> => {
+    if (canvasRef.current) {
+      try {
+        const dataURL = canvasRef.current.toDataURL('image/png');
+        const blob = await fetch(dataURL).then((res) => res.blob());
+        const formData = new FormData();
+        formData.append('file', blob, username);
+
+        const response = await fetch('/api/upload', { method: 'POST', body: formData });
+        const data = await response.json();
+        if (response.ok) return data.ipfsHash;
+        else throw new Error(data.message || 'Upload failed.');
+      } catch (error) {
+        console.error("Error uploading image:", error);
+      }
+    }
+  }, [username]);
+
+  // Handle casting an image
+  const handleCast = useCallback(async () => {
+    try {
+      const ipfsHash = await handleSaveImage();
+      if (ipfsHash) {
+        sdk.actions.openUrl(
+          `https://warpcast.com/~/compose?text=This%20is%20really%20cool%20-%20Frame%20by%20@joebaeda&embeds[]=https://gateway.pinata.cloud/ipfs/${ipfsHash}`
+        );
+        await notifyUser("Congratulations 🎉", "One pixel cast has been successfully sent to your timeline.");
+      } else {
+        console.error("Failed to send cast.");
+      }
+    } catch (error) {
+      console.error("Error casting image:", error);
+    }
+  }, [handleSaveImage, notifyUser]);
+
+  // Handle minting a token
+  const handleMint = async () => {
+    try {
+      const ipfsHash = await handleSaveImage();
+      if (ipfsHash) {
+        writeContract({
+          abi: pixelCastAbi,
+          chainId: base.id,
+          address: pixelCastAddress,
+          functionName: 'mint',
+          value: parseEther('0.001'),
+          args: [`ipfs://${ipfsHash}`],
+        });
+
+        await notifyUser("Congratulations 🎉", "One Pixel Cast has been minted on the Base Network.");
+      } else {
+        console.error("Failed to upload drawing to IPFS.");
+      }
+    } catch (error) {
+      console.error("Error minting image:", error);
+    }
+  };
+
+  // Clear canvas
+  const handleClearCanvas = () => {
+    if (canvasRef.current) {
+      const ctx = canvasRef.current.getContext('2d');
+      ctx?.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
+      localStorage.removeItem('pixelArt');
     }
   };
 
@@ -83,44 +118,15 @@ const PixelCast = ({ fid, username, pfp }: IProfile) => {
     if (savedArt && canvasRef.current) {
       const img = new Image();
       img.onload = () => {
-        const canvas = canvasRef.current;
-        const ctx = canvas?.getContext('2d');
+        const ctx = canvasRef.current?.getContext('2d');
         ctx?.drawImage(img, 0, 0);
       };
       img.src = savedArt;
     }
   }, []);
 
-  // Handle color selection
+  // Handle color change
   const handleColorChange = (color: string) => setSelectedColor(color);
-
-  // Clear canvas and local storage
-  const handleClearCanvas = () => {
-    const canvas = canvasRef.current;
-    const ctx = canvas?.getContext('2d');
-    ctx?.clearRect(0, 0, canvas.width, canvas.height);
-    localStorage.removeItem('pixelArt');
-  };
-
-  // Save canvas to IPFS
-  const handleSaveImage = async (): Promise<string | undefined> => {
-    const canvas = canvasRef.current;
-    if (canvas) {
-      const dataURL = canvas.toDataURL('image/png');
-      const blob = await fetch(dataURL).then((res) => res.blob());
-      const formData = new FormData();
-      formData.append('file', blob, username);
-
-      try {
-        const response = await fetch('/api/upload', { method: 'POST', body: formData });
-        const data = await response.json();
-        if (response.ok) return data.ipfsHash;
-        else console.error('Upload error:', data);
-      } catch (err) {
-        console.error('Error uploading file:', err);
-      }
-    }
-  };
 
   return (
     <div className="bg-gray-50">
@@ -135,8 +141,6 @@ const PixelCast = ({ fid, username, pfp }: IProfile) => {
         />
         <ToolBar
           selectedColor={selectedColor}
-          chainId={chainId}
-          baseId={base.id}
           isPending={isPending}
           isConfirming={isConfirming}
           isConfirmed={isConfirmed}

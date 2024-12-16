@@ -6,8 +6,6 @@ import CastButton from './CastButton';
 
 interface ToolBarProps {
   selectedColor: string
-  chainId: number
-  baseId: number
   isPending: boolean
   isConfirming: boolean
   isConfirmed: boolean
@@ -19,8 +17,6 @@ interface ToolBarProps {
 
 const ToolBar = ({
   selectedColor,
-  chainId,
-  baseId,
   isPending,
   isConfirming,
   isConfirmed,
@@ -87,7 +83,7 @@ const ToolBar = ({
 
           <div className="flex flex-col space-y-1 items-center">
             <button
-              disabled={chainId !== baseId || isPending}
+              disabled={isConfirming || isPending}
               onClick={() => setShowColorPicker(true)}
               className="rounded-full disabled:opacity-50"
             >
@@ -98,7 +94,7 @@ const ToolBar = ({
 
           <div className="flex flex-col space-y-1 items-center">
             <button
-              disabled={chainId !== baseId || isPending}
+              disabled={isConfirming || isPending}
               onClick={() => onCastImage()}
               className="rounded-full disabled:opacity-50"
             >
@@ -109,7 +105,7 @@ const ToolBar = ({
 
           <div className="flex flex-col space-y-1 items-center">
             <button
-              disabled={chainId !== baseId || isPending}
+              disabled={isConfirming || isPending}
               onClick={() => onBaseImage()}
               className="rounded-full disabled:opacity-50"
             >
@@ -120,7 +116,7 @@ const ToolBar = ({
 
           <div className="flex flex-col space-y-1 items-center">
             <button
-              disabled={chainId !== baseId || isPending}
+              disabled={isConfirming || isPending}
               onClick={onClearCanvas}
               className="rounded-full disabled:opacity-50"
             >
