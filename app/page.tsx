@@ -28,15 +28,12 @@ export default function Home() {
     return <Loading />
   }
 
-  if (!context?.client.clientFid) {
-    return <Redirect />
-  }
-
-  if (!context.client.added) {
-    sdk.actions.addFrame()
-  }
-
   return (
-      <PixelCast fid={context.user.fid as number} username={context.user.username as string} pfp={context.user.pfpUrl as string} />
+    <>
+      {context ?
+        <PixelCast fid={context.user.fid as number} username={context.user.username as string} pfp={context.user.pfpUrl as string} />
+        : <Redirect />
+      }
+    </>
   )
 }
