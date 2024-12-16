@@ -60,7 +60,8 @@ const PixelCast = ({fid, username}: IProfile) => {
   const notifyUser = async (title: string, body: string) => {
     try {
       const response = await fetch('/api/send-notify', {
-        method: 'POST',
+        method: "POST",
+        mode: "same-origin",
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({fid, title, body }),
       });

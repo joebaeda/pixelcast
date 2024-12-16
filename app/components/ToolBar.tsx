@@ -1,3 +1,5 @@
+"use client"
+
 import { Trash2, Palette, } from 'lucide-react'
 import BaseButton from './BaseButton'
 import { useEffect, useState } from 'react'
