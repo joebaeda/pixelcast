@@ -37,7 +37,7 @@ export default function Home() {
 
   return (
     <>
-      {address && context?.client.added ? (
+      {address && context?.user.fid ? (
         <div className="bg-gray-50">
           <header>
             <Header username={context.user.username as string} pfp={context.user.pfpUrl as string} balance={parseFloat(formatEther(balance.data?.value as bigint)).toFixed(3)} />
