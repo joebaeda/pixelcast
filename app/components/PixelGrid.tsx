@@ -49,6 +49,7 @@ const PixelGrid = ({ gridSize, selectedColor, canvasRef }: PixelGridProps) => {
   }
 
   const handlePointerDown = (e: React.PointerEvent<HTMLCanvasElement>) => {
+    e.preventDefault() // Prevent default gestures like scrolling
     isDrawing.current = true
     const rect = e.currentTarget.getBoundingClientRect()
     const x = e.clientX - rect.left
@@ -81,7 +82,7 @@ const PixelGrid = ({ gridSize, selectedColor, canvasRef }: PixelGridProps) => {
     <div className="w-full max-w-[384px] aspect-square mx-auto">
       <canvas
         ref={canvasRef}
-        className="w-full h-full block border border-gray-300 touch-none"
+        className="w-full h-full block border border-gray-300 touch-none select-none"
         onPointerDown={handlePointerDown}
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}
@@ -92,4 +93,3 @@ const PixelGrid = ({ gridSize, selectedColor, canvasRef }: PixelGridProps) => {
 }
 
 export default PixelGrid
-

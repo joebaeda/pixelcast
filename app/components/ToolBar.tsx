@@ -89,7 +89,7 @@ const ToolBar = ({
             <button
               disabled={chainId !== baseId || isPending}
               onClick={() => setShowColorPicker(true)}
-              className="p-2 bg-gray-200 rounded-full disabled:opacity-50"
+              className="p-2 rounded-full disabled:opacity-50"
             >
               <Palette className="w-6 h-6" />
             </button>
@@ -122,7 +122,7 @@ const ToolBar = ({
             <button
               disabled={chainId !== baseId || isPending}
               onClick={onClearCanvas}
-              className="p-2 bg-gray-200 rounded-full"
+              className="p-2 rounded-full"
             >
               <Trash2 className="w-6 h-6" />
             </button>
