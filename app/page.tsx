@@ -13,15 +13,14 @@ export default function Home() {
 
   useEffect(() => {
     const load = async () => {
-      setContext(await sdk.context);
-      sdk.actions.ready({});
-    };
-
-    if (sdk && !isSDKLoaded) {
-      setIsSDKLoaded(true);
-      load();
+      const frameContext = await sdk.context;
+      if (frameContext) {
+        setContext(frameContext);
+        sdk.actions.ready({});
+        setIsSDKLoaded(true);
+      }
     }
-
+    load();
   }, [isSDKLoaded]);
 
   if (!isSDKLoaded) {
@@ -30,7 +29,7 @@ export default function Home() {
 
   return (
     <>
-      {context?.user.fid ?
+      {context?.client.added ?
         <PixelCast fid={context.user.fid as number} username={context.user.username as string} pfp={context.user.pfpUrl as string} />
         : <Redirect />
       }
