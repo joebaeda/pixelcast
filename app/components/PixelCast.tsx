@@ -160,7 +160,7 @@ const PixelCast = ({ username, pfp }: IProfile) => {
       <header>
         <Header username={username} pfp={pfp} />
       </header>
-      <main className="fixed px-4 inset-0 flex justify-center items-center">
+      <main className="px-4">
         <PixelGrid
           gridSize={{ width: 48, height: 48 }}
           selectedColor={selectedColor}
