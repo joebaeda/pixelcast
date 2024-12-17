@@ -13,14 +13,13 @@ export default function Home() {
 
   useEffect(() => {
     const load = async () => {
-      const frameContext = await sdk.context;
-      if (frameContext) {
-        setContext(frameContext);
-        sdk.actions.ready({});
-        setIsSDKLoaded(true);
-      }
+      setContext(await sdk.context);
+      sdk.actions.ready({});
+    };
+    if (sdk && !isSDKLoaded) {
+      setIsSDKLoaded(true);
+      load();
     }
-    load();
   }, [isSDKLoaded]);
 
   if (!isSDKLoaded) {
