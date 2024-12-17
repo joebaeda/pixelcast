@@ -52,27 +52,8 @@ const PixelCast = ({ username, pfp }: IProfile) => {
     }
   }, [isPending, isConfirming, isConfirmed, modalMessage]);
 
-
-  // Notify user
-  const notifyUser = useCallback(async (title: string, body: string) => {
-    try {
-      const response = await fetch('/api/send-notify', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ title, body }),
-      });
-
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Notification failed.');
-      }
-    } catch (error) {
-      console.error("Notification error:", error);
-    }
-  }, []);
-
   // Save image to IPFS
-  const handleSaveImage = useCallback(async (): Promise<string | undefined> => {
+  const handleSaveImage = (async (): Promise<string | undefined> => {
     if (canvasRef.current) {
       try {
         const dataURL = canvasRef.current.toDataURL('image/png');
@@ -88,30 +69,26 @@ const PixelCast = ({ username, pfp }: IProfile) => {
         console.error("Error uploading image:", error);
       }
     }
-  }, [username]);
+  });
 
   // Handle casting an image
   const handleCast = useCallback(async () => {
-    try {
-      const ipfsHash = await handleSaveImage();
-      if (ipfsHash) {
-        sdk.actions.openUrl(
-          `https://warpcast.com/~/compose?text=This%20is%20really%20cool%20-%20Frame%20by%20@joebaeda&embeds[]=https://gateway.pinata.cloud/ipfs/${ipfsHash}`
-        );
-        await notifyUser("Congratulations 🎉", "One pixel cast has been successfully sent to your timeline.");
-      } else {
-        console.error("Failed to send cast.");
-      }
-    } catch (error) {
-      console.error("Error casting image:", error);
+    const ipfsHash = await handleSaveImage();
+    if (ipfsHash) {
+      sdk.actions.openUrl(
+        `https://warpcast.com/~/compose?text=This%20is%20really%20cool%20-%20Frame%20by%20@joebaeda&embeds[]=https://gateway.pinata.cloud/ipfs/${ipfsHash}`
+      );
+    } else {
+      console.error("Failed to send cast.");
     }
-  }, [handleSaveImage, notifyUser]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Handle minting a token
   const handleMint = async () => {
-    try {
-      const ipfsHash = await handleSaveImage();
-      if (ipfsHash) {
+    const ipfsHash = await handleSaveImage();
+    if (ipfsHash) {
+      try {
         writeContract({
           abi: pixelCastAbi,
           chainId: base.id,
@@ -121,12 +98,11 @@ const PixelCast = ({ username, pfp }: IProfile) => {
           args: [`ipfs://${ipfsHash}`],
         });
 
-        await notifyUser("Congratulations 🎉", "One Pixel Cast has been minted on the Base Network.");
-      } else {
-        console.error("Failed to upload drawing to IPFS.");
+      } catch (error) {
+        console.error("Error minting image:", error);
       }
-    } catch (error) {
-      console.error("Error minting image:", error);
+    } else {
+      console.error("Failed to upload drawing to IPFS.");
     }
   };
 
@@ -209,7 +185,6 @@ const PixelCast = ({ username, pfp }: IProfile) => {
               <button
                 disabled={isConfirming || isPending}
                 onClick={handleCast}
-                onTouchStart={handleCast}
                 className="rounded-full disabled:opacity-50"
               >
                 {isConfirming || isPending ? (
@@ -225,7 +200,6 @@ const PixelCast = ({ username, pfp }: IProfile) => {
               <button
                 disabled={isConfirming || isPending}
                 onClick={handleMint}
-                onTouchStart={handleMint}
                 className="rounded-full disabled:opacity-50"
               >
                 {isConfirming || isPending ? (
