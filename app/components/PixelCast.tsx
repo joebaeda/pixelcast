@@ -166,7 +166,7 @@ const PixelCast = ({ username, pfp }: IProfile) => {
       )}
 
       {/* Toolbar */}
-      <div className="absolute rounded-t-2xl mx-auto bottom-0 left-0 right-0 bg-[#281537] shadow-md p-4">
+      <div className="absolute rounded-t-2xl mx-auto bottom-0 left-0 right-0 z-50 bg-[#281537] shadow-md p-4">
         <div className="flex mx-auto flex-row justify-between items-center space-x-4">
 
           <div className="flex flex-col space-y-1 items-center">
