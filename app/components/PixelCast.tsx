@@ -9,7 +9,7 @@ import { pixelCastAbi, pixelCastAddress } from '@/lib/contract';
 import { base } from 'wagmi/chains';
 import { parseEther } from 'viem';
 import { SketchPicker } from 'react-color';
-import { Palette, Trash2 } from 'lucide-react';
+import { EllipsisVertical, Palette, Trash2 } from 'lucide-react';
 import CastButton from './CastButton';
 import BaseButton from './BaseButton';
 
@@ -29,6 +29,7 @@ const PixelCast = ({ username, pfp }: IProfile) => {
   const [showColorPicker, setShowColorPicker] = useState(false);
   const [showTransactionModal, setShowTransactionModal] = useState(false);
   const [modalMessage, setModalMessage] = useState<string | null>(null);
+  const [showToolBar, setShowToolBar] = useState(false);
 
   useEffect(() => {
     if (isPending) {
@@ -78,7 +79,7 @@ const PixelCast = ({ username, pfp }: IProfile) => {
     } catch (error) {
       console.error("Error casting image:", error);
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Handle minting a token
@@ -166,55 +167,59 @@ const PixelCast = ({ username, pfp }: IProfile) => {
       )}
 
       {/* Toolbar */}
-      <div className="absolute rounded-t-2xl mx-auto bottom-0 left-0 right-0 z-50 bg-[#281537] shadow-md p-4">
-        <div className="flex mx-auto flex-row justify-between items-center space-x-4">
+      {showToolBar ? (
+        <div className="absolute flex flex-col space-y-6 top-4 left-4">
+          
+          <button
+            disabled={isConfirming || isPending}
+            onClick={() => setShowToolBar(false)}
+            className="rounded-xl bg-[#4f2d61] p-2 disabled:opacity-50"
+          >
+            <EllipsisVertical className="w-6 h-6 text-gray-200" />
+          </button>
 
-          <div className="flex flex-col space-y-1 items-center">
-            <button
-              disabled={isConfirming || isPending}
-              onClick={() => setShowColorPicker(true)}
-              className="rounded-full disabled:opacity-50"
-            >
-              <Palette className="w-6 h-6 text-gray-200" />
-            </button>
-            <p className="text-gray-200 text-sm font-bold">Color</p>
-          </div>
+          <button
+            disabled={isConfirming || isPending}
+            onClick={() => setShowColorPicker(true)}
+            className="rounded-xl bg-[#4f2d61] p-2 disabled:opacity-50"
+          >
+            <Palette className="w-6 h-6 text-gray-200" />
+          </button>
 
-          <div className="flex flex-col space-y-1 items-center">
-            <button
-              disabled={isConfirming || isPending}
-              onClick={handleCast}
-              className="rounded-full disabled:opacity-50"
-            >
-              <CastButton className="w-6 h-6" />
-            </button>
-            <p className="text-gray-200 text-sm font-bold">Cast</p>
-          </div>
+          <button
+            disabled={isConfirming || isPending}
+            onClick={handleCast}
+            className="rounded-xl bg-[#4f2d61] p-2 disabled:opacity-50"
+          >
+            <CastButton className="w-6 h-6" />
+          </button>
 
-          <div className="flex flex-col space-y-1 items-center">
-            <button
-              disabled={isConfirming || isPending}
-              onClick={handleMint}
-              className="rounded-full disabled:opacity-50"
-            >
-              <BaseButton className="w-6 h-6" />
-            </button>
-            <p className="text-gray-200 text-sm font-bold">Mint</p>
-          </div>
+          <button
+            disabled={isConfirming || isPending}
+            onClick={handleMint}
+            className="rounded-xl bg-[#4f2d61] p-2 disabled:opacity-50"
+          >
+            <BaseButton className="w-6 h-6" />
+          </button>
 
-          <div className="flex flex-col space-y-1 items-center">
-            <button
-              disabled={isConfirming || isPending}
-              onClick={handleClearCanvas}
-              className="rounded-full disabled:opacity-50"
-            >
-              <Trash2 className="w-6 h-6 text-gray-200" />
-            </button>
-            <p className="text-gray-200 text-sm font-bold">Delete</p>
-          </div>
+          <button
+            disabled={isConfirming || isPending}
+            onClick={handleClearCanvas}
+            className="rounded-xl bg-[#4f2d61] p-2 disabled:opacity-50"
+          >
+            <Trash2 className="w-6 h-6 text-gray-200" />
+          </button>
         </div>
-      </div>
-      {/* Toolbar End */}
+      ) : (
+        <div className="absolute flex flex-col top-4 left-4">
+          <button
+            onClick={() => setShowToolBar(true)}
+            className="rounded-xl bg-[#4f2d61] p-2 disabled:opacity-50"
+          >
+            <EllipsisVertical className="w-6 h-6 text-gray-200" />
+          </button>
+        </div>
+      )}
 
     </div>
   );
