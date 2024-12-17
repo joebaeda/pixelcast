@@ -7,6 +7,7 @@ export const config = createConfig({
   ssr: true,
   connectors: [
     frameConnector(),
+    //injected(),
   ],
   transports: {
     [base.id]: http(),

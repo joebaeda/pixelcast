@@ -156,11 +156,11 @@ const PixelCast = ({ username, pfp }: IProfile) => {
   const handleColorChange = (color: string) => setSelectedColor(color);
 
   return (
-    <div className="bg-gray-50">
+    <>
       <header>
         <Header username={username} pfp={pfp} />
       </header>
-      <main className="px-4">
+      <main>
         <PixelGrid
           gridSize={{ width: 48, height: 48 }}
           selectedColor={selectedColor}
@@ -249,7 +249,7 @@ const PixelCast = ({ username, pfp }: IProfile) => {
           </div>
         </div>
       </main>
-    </div>
+    </>
   );
 };
 
