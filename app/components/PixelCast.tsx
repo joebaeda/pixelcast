@@ -14,12 +14,11 @@ import CastButton from './CastButton';
 import BaseButton from './BaseButton';
 
 interface IProfile {
-  fid: number;
   username: string;
   pfp: string;
 }
 
-const PixelCast = ({ fid, username, pfp }: IProfile) => {
+const PixelCast = ({ username, pfp }: IProfile) => {
   const [selectedColor, setSelectedColor] = useState('#000000');
   const canvasRef = useRef<HTMLCanvasElement>(null!);
 
@@ -60,7 +59,7 @@ const PixelCast = ({ fid, username, pfp }: IProfile) => {
       const response = await fetch('/api/send-notify', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ fid, title, body }),
+        body: JSON.stringify({ title, body }),
       });
 
       if (!response.ok) {
@@ -70,7 +69,7 @@ const PixelCast = ({ fid, username, pfp }: IProfile) => {
     } catch (error) {
       console.error("Notification error:", error);
     }
-  }, [fid]);
+  }, []);
 
   // Save image to IPFS
   const handleSaveImage = useCallback(async (): Promise<string | undefined> => {
@@ -213,7 +212,7 @@ const PixelCast = ({ fid, username, pfp }: IProfile) => {
                 className="rounded-full disabled:opacity-50"
               >
                 {isConfirming || isPending ? (
-                  <Ellipsis className="w-6 h-6 animate-bounce" />
+                  <Ellipsis className="w-6 h-6 text-gray-200 animate-bounce" />
                 ) : (
                   <CastButton className="w-6 h-6" />
                 )}
@@ -228,7 +227,7 @@ const PixelCast = ({ fid, username, pfp }: IProfile) => {
                 className="rounded-full disabled:opacity-50"
               >
                 {isConfirming || isPending ? (
-                  <Ellipsis className="w-6 h-6 animate-bounce" />
+                  <Ellipsis className="w-6 h-6 text-gray-200 animate-bounce" />
                 ) : (
                   <BaseButton className="w-6 h-6" />
                 )}

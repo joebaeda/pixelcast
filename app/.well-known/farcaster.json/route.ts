@@ -10,9 +10,11 @@ export async function GET() {
       version: "0.0.1",
       name: "Pixel Cast",
       iconUrl: "https://pixelcast.vercel.app/splash.png",
+      homeUrl: "https://pixelcast.vercel.app",
+      imageUrl: "https://pixelcast.vercel.app/og-image.jpg",
+      buttonTitle: "Cast your Pixel!",
       splashImageUrl: "https://pixelcast.vercel.app/splash.png",
       splashBackgroundColor: "#ede4ca",
-      homeUrl: "https://pixelcast.vercel.app",
       webhookUrl: "https://pixelcast.vercel.app/api/webhook"
     },
   };

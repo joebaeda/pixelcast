@@ -30,9 +30,10 @@ export default function Home() {
   return (
     <>
       {context?.client.added ?
-        <PixelCast fid={context.user.fid as number} username={context.user.username as string} pfp={context.user.pfpUrl as string} />
+        <PixelCast username={context.user.username as string} pfp={context.user.pfpUrl as string} />
         : <Loading />
       }
+      {/*<PixelCast username={"Joe bae"} pfp={"/splash.png"} />*/}
     </>
   )
 }
