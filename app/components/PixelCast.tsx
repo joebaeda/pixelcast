@@ -9,7 +9,7 @@ import { pixelCastAbi, pixelCastAddress } from '@/lib/contract';
 import { base } from 'wagmi/chains';
 import { parseEther } from 'viem';
 import { SketchPicker } from 'react-color';
-import { Palette, Trash2 } from 'lucide-react';
+import { Ellipsis, Palette, Trash2 } from 'lucide-react';
 import CastButton from './CastButton';
 import BaseButton from './BaseButton';
 
@@ -212,7 +212,11 @@ const PixelCast = ({ fid, username, pfp }: IProfile) => {
                 onClick={handleCast}
                 className="rounded-full disabled:opacity-50"
               >
-                <CastButton className="w-6 h-6" />
+                {isConfirming || isPending ? (
+                  <Ellipsis className="w-6 h-6 animate-bounce" />
+                ) : (
+                  <CastButton className="w-6 h-6" />
+                )}
               </button>
               <p className="text-gray-200 text-sm font-bold">Cast</p>
             </div>
@@ -223,7 +227,11 @@ const PixelCast = ({ fid, username, pfp }: IProfile) => {
                 onClick={handleMint}
                 className="rounded-full disabled:opacity-50"
               >
-                <BaseButton className="w-6 h-6" />
+                {isConfirming || isPending ? (
+                  <Ellipsis className="w-6 h-6 animate-bounce" />
+                ) : (
+                  <BaseButton className="w-6 h-6" />
+                )}
               </button>
               <p className="text-gray-200 text-sm font-bold">Mint</p>
             </div>
@@ -247,3 +255,4 @@ const PixelCast = ({ fid, username, pfp }: IProfile) => {
 };
 
 export default PixelCast;
+
