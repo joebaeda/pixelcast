@@ -191,7 +191,7 @@ const PixelCast = ({ username, pfp }: IProfile) => {
           </div>
         )}
 
-        <div className="fixed rounded-t-2xl mx-auto bottom-0 left-0 right-0 bg-[#281537] shadow-md p-4">
+        <div className="absolute inset-x-0 rounded-t-2xl mx-auto bottom-0 left-0 right-0 bg-[#281537] shadow-md p-4 z-50">
           <div className="flex mx-auto flex-row justify-between items-center space-x-4">
 
             <div className="flex flex-col space-y-1 items-center">
@@ -209,7 +209,6 @@ const PixelCast = ({ username, pfp }: IProfile) => {
               <button
                 disabled={isConfirming || isPending}
                 onClick={handleCast}
-                onTouchStart={handleCast}
                 className="rounded-full disabled:opacity-50"
               >
                 {isConfirming || isPending ? (
@@ -225,7 +224,6 @@ const PixelCast = ({ username, pfp }: IProfile) => {
               <button
                 disabled={isConfirming || isPending}
                 onClick={handleMint}
-                onTouchStart={handleMint}
                 className="rounded-full disabled:opacity-50"
               >
                 {isConfirming || isPending ? (
