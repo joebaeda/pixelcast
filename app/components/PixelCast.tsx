@@ -209,6 +209,7 @@ const PixelCast = ({ username, pfp }: IProfile) => {
               <button
                 disabled={isConfirming || isPending}
                 onClick={handleCast}
+                onTouchStart={handleCast}
                 className="rounded-full disabled:opacity-50"
               >
                 {isConfirming || isPending ? (
@@ -224,6 +225,7 @@ const PixelCast = ({ username, pfp }: IProfile) => {
               <button
                 disabled={isConfirming || isPending}
                 onClick={handleMint}
+                onTouchStart={handleMint}
                 className="rounded-full disabled:opacity-50"
               >
                 {isConfirming || isPending ? (
