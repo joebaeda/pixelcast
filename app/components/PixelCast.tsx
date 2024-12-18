@@ -44,14 +44,19 @@ const PixelCast = () => {
   }, []);
 
   // Handle Cast
-  const handleCast = useCallback(() => {
-    const ipfsHash = handleSaveImage();
-    if (ipfsHash) {
-      sdk.actions.openUrl(
-        `https://warpcast.com/~/compose?text=This%20is%20really%20cool%20-%20Frame%20by%20@joebaeda&embeds[]=https://gateway.pinata.cloud/ipfs/${ipfsHash}`
-      );
-    } else {
-      console.error("Failed to send cast.");
+  const handleCast = useCallback(async () => {
+    try {
+      const ipfsHash = await handleSaveImage();
+      if (ipfsHash) {
+        console.log('Casting with IPFS hash:', ipfsHash);
+        await sdk.actions.openUrl(
+          `https://warpcast.com/~/compose?text=This%20is%20really%20cool%20-%20Frame%20by%20@joebaeda&embeds[]=https://gateway.pinata.cloud/ipfs/${ipfsHash}`
+        );
+      } else {
+        console.error("Failed to get IPFS hash for casting.");
+      }
+    } catch (error) {
+      console.error("Error in handleCast:", error);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -116,16 +121,30 @@ const PixelCast = () => {
         const dataURL = canvasRef.current.toDataURL('image/png');
         const blob = await fetch(dataURL).then((res) => res.blob());
         const formData = new FormData();
-        formData.append('file', blob, context?.user.username);
+        formData.append('file', blob, `${context?.user?.username || 'unnamed'}.png`);
 
-        const response = await fetch('/api/upload', { method: 'POST', body: formData });
+        const response = await fetch('/api/upload', {
+          method: 'POST',
+          body: formData,
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
         const data = await response.json();
-        if (response.ok) return data.ipfsHash;
-        else throw new Error(data.message || 'Upload failed.');
+        if (data.ipfsHash) {
+          console.log('IPFS Hash:', data.ipfsHash);
+          return data.ipfsHash;
+        } else {
+          throw new Error('IPFS hash not found in response');
+        }
       } catch (error) {
         console.error("Error uploading image:", error);
+        return undefined;
       }
     }
+    return undefined;
   };
 
   // Handle Color
