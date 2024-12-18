@@ -23,7 +23,6 @@ const PixelCast = () => {
   const [embedHash, setEmbedHash] = useState("");
   const [isSDKLoaded, setIsSDKLoaded] = useState(false);
   const [context, setContext] = useState<FrameContext>();
-  const [error, setError] = useState<string | null>(null);
 
   // Wagmi
   const chainId = useChainId();
@@ -44,52 +43,36 @@ const PixelCast = () => {
     }
   }, []);
 
-  // Function to upload image to temporary storage
-  const uploadImageToTempStorage = async (imageBlob: Blob): Promise<string> => {
-    const formData = new FormData();
-    formData.append('file', imageBlob, 'pixelcast.png');
-
-    const response = await fetch('/api/upload-temp', {
-      method: 'POST',
-      body: formData,
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.error || 'Failed to upload image to temporary storage');
+  // Handle Cast
+  const handleCast = async () => {
+    const ipfsHash = await handleSaveImage()
+    if (ipfsHash) {
+      sdk.actions.openUrl(`https://warpcast.com/~/compose?text=this%20is%20really%20cool%20-%20just%20create%20one!&embeds[]=https://gateway.pinata.cloud/ipfs/${ipfsHash}`)
     }
+  }
 
-    const data = await response.json();
-    return data.url;
-  };
-
-  // Updated handleCast function
-  const handleCast = useCallback(async () => {
-    try {
-      setError(null);
-      if (canvasRef.current) {
-        const imageBlob = await new Promise<Blob>((resolve) => 
-          canvasRef.current!.toBlob((blob) => resolve(blob!), 'image/png')
-        );
-
-        const imageUrl = await uploadImageToTempStorage(imageBlob);
-
-        const castText = "Check out my PixelCast creation!";
-        const encodedText = encodeURIComponent(castText);
-        const encodedImageUrl = encodeURIComponent(imageUrl);
-        
-        const warpcastUrl = `https://warpcast.com/~/compose?text=${encodedText}&embeds[]=${encodedImageUrl}`;
-        
-        console.log('Opening Warpcast with URL:', warpcastUrl);
-        await sdk.actions.openUrl(warpcastUrl);
-      } else {
-        throw new Error("Canvas reference is not available.");
-      }
-    } catch (error) {
-      console.error("Error in handleCast:", error);
-      setError(error instanceof Error ? error.message : 'An unknown error occurred');
+  // Create Notifications
+  useEffect(() => {
+    if (isConfirmed) {
+      // Notify user
+      async function notifyUser() {
+        try {
+          await fetch('/api/send-notify', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              fid: context?.user.fid,
+              title: "Congratulations 🎉",
+              body: "One Awesome Scratch of Art has been minted on the Base Network.",
+            }),
+          });
+        } catch (error) {
+          console.error("Notification error:", error);
+        }
+      };
+      notifyUser();
     }
-  }, [canvasRef]);
+  }, [context?.user.fid, isConfirmed])
 
   // Load saved art on mount
   useEffect(() => {
@@ -145,36 +128,37 @@ const PixelCast = () => {
   };
 
   // Save image to IPFS
-  const handleSaveImage = async (): Promise<string | undefined> => {
-    if (canvasRef.current) {
-      try {
-        const dataURL = canvasRef.current.toDataURL('image/png');
-        const blob = await fetch(dataURL).then((res) => res.blob());
-        const formData = new FormData();
-        formData.append('file', blob, `${context?.user?.username || 'unnamed'}.png`);
+  const handleSaveImage = async () => {
+    const canvas = canvasRef.current
+    if (canvas) {
+      // Convert canvas to data URL
+      const dataURL = canvas.toDataURL('image/png');
 
-        const response = await fetch('/api/upload-ipfs', {
+      // Convert data URL to Blob
+      const blob = await fetch(dataURL).then(res => res.blob());
+
+      // Create FormData for Pinata upload
+      const formData = new FormData();
+      formData.append('file', blob, `${context?.user.username}.png || pixelcast.png`);
+      try {
+
+        const response = await fetch('/api/upload', {
           method: 'POST',
           body: formData,
         });
 
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
 
         const data = await response.json();
-        if (data.ipfsHash) {
-          console.log('IPFS Hash:', data.ipfsHash);
-          return data.ipfsHash;
+
+        if (response.ok) {
+          return data.ipfsHash; // Set the IPFS hash on success
         } else {
-          throw new Error('IPFS hash not found in response');
+          console.log({ message: 'Something went wrong', type: 'error' });
         }
-      } catch (error) {
-        console.error("Error uploading image:", error);
-        return undefined;
+      } catch (err) {
+        console.log({ message: 'Error uploading file', type: 'error', error: err });
       }
     }
-    return undefined;
   };
 
   // Handle Color
@@ -182,24 +166,22 @@ const PixelCast = () => {
 
   // Handle Mint
   const handleMint = async () => {
-    try {
-      const ipfsHash = await handleSaveImage();
-      if (ipfsHash) {
-        writeContract({
-          abi: pixelCastAbi,
-          chainId: base.id,
-          address: pixelCastAddress,
-          functionName: 'mint',
-          value: parseEther('0.001'),
-          args: [`ipfs://${ipfsHash}`],
-        });
+    const ipfsHash = await handleSaveImage();
+    if (ipfsHash) {
 
-        setEmbedHash(ipfsHash);
-      } else {
-        console.error("Failed to save image for minting.");
-      }
-    } catch (error) {
-      console.error("Error in handleMint:", error);
+      setEmbedHash(ipfsHash)
+
+      writeContract({
+        abi: pixelCastAbi,
+        chainId: base.id,
+        address: pixelCastAddress as `0x${string}`,
+        functionName: "mint",
+        value: parseEther("0.001"),
+        args: [`ipfs://${ipfsHash}`],
+      });
+
+    } else {
+      console.error("Failed to upload drawing to IPFS.");
     }
   };
 
@@ -287,14 +269,6 @@ const PixelCast = () => {
               Close
             </button>
           </div>
-        </div>
-      )}
-
-      {/* Error Message */}
-      {error && (
-        <div className="fixed bottom-4 left-4 right-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded" role="alert">
-          <strong className="font-bold">Error: </strong>
-          <span className="block sm:inline">{error}</span>
         </div>
       )}
 
