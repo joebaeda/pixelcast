@@ -27,12 +27,10 @@ export async function POST(request: NextRequest) {
     requestBody.data.notificationDetails
   );
 
-  const { title, body } = requestBody.data;
-
   const sendResult = await sendFrameNotification({
     fid: requestBody.data.fid,
-    title: title,
-    body: body,
+    title: requestBody.data.title,
+    body: requestBody.data.body,
   });
 
   if (sendResult.state === "error") {

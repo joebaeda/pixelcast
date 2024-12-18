@@ -102,7 +102,10 @@ const PixelCast = () => {
   const addScratch = useCallback(async () => {
     try {
 
-      await sdk.actions.addFrame();
+      const result = await sdk.actions.addFrame();
+      if (result.added) {
+        console.log(result.notificationDetails)
+      }
 
     } catch (error) {
       console.log(`Error: ${error}`);
