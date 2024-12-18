@@ -23,6 +23,7 @@ const PixelCast = () => {
   const [embedHash, setEmbedHash] = useState("");
   const [isSDKLoaded, setIsSDKLoaded] = useState(false);
   const [context, setContext] = useState<FrameContext>();
+  const [error, setError] = useState<string | null>(null);
 
   // Wagmi
   const chainId = useChainId();
@@ -54,7 +55,8 @@ const PixelCast = () => {
     });
 
     if (!response.ok) {
-      throw new Error('Failed to upload image to temporary storage');
+      const errorData = await response.json();
+      throw new Error(errorData.error || 'Failed to upload image to temporary storage');
     }
 
     const data = await response.json();
@@ -64,6 +66,7 @@ const PixelCast = () => {
   // Updated handleCast function
   const handleCast = useCallback(async () => {
     try {
+      setError(null);
       if (canvasRef.current) {
         const imageBlob = await new Promise<Blob>((resolve) => 
           canvasRef.current!.toBlob((blob) => resolve(blob!), 'image/png')
@@ -71,7 +74,7 @@ const PixelCast = () => {
 
         const imageUrl = await uploadImageToTempStorage(imageBlob);
 
-        const castText = "Check out my PixelCast creation! Frame by @joebaeda";
+        const castText = "Check out my PixelCast creation!";
         const encodedText = encodeURIComponent(castText);
         const encodedImageUrl = encodeURIComponent(imageUrl);
         
@@ -80,10 +83,11 @@ const PixelCast = () => {
         console.log('Opening Warpcast with URL:', warpcastUrl);
         await sdk.actions.openUrl(warpcastUrl);
       } else {
-        console.error("Canvas reference is not available.");
+        throw new Error("Canvas reference is not available.");
       }
     } catch (error) {
       console.error("Error in handleCast:", error);
+      setError(error instanceof Error ? error.message : 'An unknown error occurred');
     }
   }, [canvasRef]);
 
@@ -283,6 +287,14 @@ const PixelCast = () => {
               Close
             </button>
           </div>
+        </div>
+      )}
+
+      {/* Error Message */}
+      {error && (
+        <div className="fixed bottom-4 left-4 right-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded" role="alert">
+          <strong className="font-bold">Error: </strong>
+          <span className="block sm:inline">{error}</span>
         </div>
       )}
 
