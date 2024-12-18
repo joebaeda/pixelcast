@@ -11,16 +11,16 @@ const queryClient = new QueryClient();
 
 export default function Provider({ children }: { children: React.ReactNode }) {
   return (
-    <WagmiProvider config={config}>
-      <FrameSplashProvider>
-        <FrameContextProvider>
+    <FrameSplashProvider>
+      <FrameContextProvider>
+        <WagmiProvider config={config}>
           <QueryClientProvider client={queryClient}>
             {/* */}
             {children}
             {/* */}
           </QueryClientProvider>
-        </FrameContextProvider>
-      </FrameSplashProvider>
-    </WagmiProvider>
+        </WagmiProvider>
+      </FrameContextProvider>
+    </FrameSplashProvider>
   );
 }

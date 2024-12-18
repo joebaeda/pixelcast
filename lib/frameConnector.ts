@@ -14,7 +14,7 @@ export function frameConnector() {
   return createConnector<typeof sdk.wallet.ethProvider>((config) => ({
     id: "farcaster",
     name: "Farcaster Wallet",
-    icon: "https://scratchnism.vercel.app/farcaster.jpg",
+    icon: "https://pixelcast.vercel.app/farcaster.jpg",
     type: frameConnector.type,
 
     async setup() {

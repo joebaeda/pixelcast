@@ -36,7 +36,7 @@ import {
         notificationId: crypto.randomUUID(),
         title,
         body,
-        targetUrl: "https://pixelcast.vercel.app",
+        targetUrl: process.env.NEXT_PUBLIC_BASE_URL as string,
         tokens: [notificationDetails.token],
       } satisfies SendNotificationRequest),
     });
