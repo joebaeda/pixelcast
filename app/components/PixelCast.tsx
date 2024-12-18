@@ -43,34 +43,49 @@ const PixelCast = () => {
     }
   }, []);
 
-  // New function to get image data URL from canvas
-  const getImageDataURLFromCanvas = (): string | null => {
-    if (canvasRef.current) {
-      return canvasRef.current.toDataURL('image/png');
+  // Function to upload image to temporary storage
+  const uploadImageToTempStorage = async (imageBlob: Blob): Promise<string> => {
+    const formData = new FormData();
+    formData.append('file', imageBlob, 'pixelcast.png');
+
+    const response = await fetch('/api/upload-temp', {
+      method: 'POST',
+      body: formData,
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to upload image to temporary storage');
     }
-    return null;
+
+    const data = await response.json();
+    return data.url;
   };
 
   // Updated handleCast function
   const handleCast = useCallback(async () => {
     try {
-      const imageDataURL = getImageDataURLFromCanvas();
-      if (imageDataURL) {
+      if (canvasRef.current) {
+        const imageBlob = await new Promise<Blob>((resolve) => 
+          canvasRef.current!.toBlob((blob) => resolve(blob!), 'image/png')
+        );
+
+        const imageUrl = await uploadImageToTempStorage(imageBlob);
+
         const castText = "Check out my PixelCast creation! Frame by @joebaeda";
         const encodedText = encodeURIComponent(castText);
-        const encodedImageUrl = encodeURIComponent(imageDataURL);
+        const encodedImageUrl = encodeURIComponent(imageUrl);
         
         const warpcastUrl = `https://warpcast.com/~/compose?text=${encodedText}&embeds[]=${encodedImageUrl}`;
         
         console.log('Opening Warpcast with URL:', warpcastUrl);
         await sdk.actions.openUrl(warpcastUrl);
       } else {
-        console.error("Failed to get image data URL for casting.");
+        console.error("Canvas reference is not available.");
       }
     } catch (error) {
       console.error("Error in handleCast:", error);
     }
-  }, []);
+  }, [canvasRef]);
 
   // Load saved art on mount
   useEffect(() => {
@@ -134,7 +149,7 @@ const PixelCast = () => {
         const formData = new FormData();
         formData.append('file', blob, `${context?.user?.username || 'unnamed'}.png`);
 
-        const response = await fetch('/api/upload', {
+        const response = await fetch('/api/upload-ipfs', {
           method: 'POST',
           body: formData,
         });
