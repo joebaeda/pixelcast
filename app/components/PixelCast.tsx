@@ -23,6 +23,7 @@ const PixelCast = () => {
   const [embedHash, setEmbedHash] = useState("");
   const [isSDKLoaded, setIsSDKLoaded] = useState(false);
   const [context, setContext] = useState<FrameContext>();
+  const [notifOnCast, setNotifOnCast] = useState(false);
 
   // Wagmi
   const chainId = useChainId();
@@ -48,12 +49,13 @@ const PixelCast = () => {
     const ipfsHash = await handleSaveImage()
     if (ipfsHash) {
       sdk.actions.openUrl(`https://warpcast.com/~/compose?text=this%20is%20really%20cool%20-%20just%20create%20one!&embeds[]=https://gateway.pinata.cloud/ipfs/${ipfsHash}`)
+      setNotifOnCast(true)
     }
   }
 
   // Create Notifications
   useEffect(() => {
-    if (isConfirmed) {
+    if (isConfirmed || notifOnCast) {
       // Notify user
       async function notifyUser() {
         try {
@@ -63,7 +65,7 @@ const PixelCast = () => {
             body: JSON.stringify({
               fid: context?.user.fid,
               title: "Congratulations 🎉",
-              body: "One Awesome Scratch of Art has been minted on the Base Network.",
+              body: "One Awesome Scratch of Art has been created.",
             }),
           });
         } catch (error) {
@@ -72,7 +74,7 @@ const PixelCast = () => {
       };
       notifyUser();
     }
-  }, [context?.user.fid, isConfirmed])
+  }, [context?.user.fid, isConfirmed, notifOnCast])
 
   // Load saved art on mount
   useEffect(() => {
