@@ -6,10 +6,6 @@ import Image from "next/image";
 import { pixelCastAbi, pixelCastAddress } from "@/lib/contract";
 import PixelCastLogo from "./PixelCastLogo";
 
-interface IWelcome {
-  addScratch: () => void;
-}
-
 const extractImageUrl = (base64Uri: string): string => {
   try {
     const json = JSON.parse(atob(base64Uri.split(",")[1]));
@@ -20,7 +16,7 @@ const extractImageUrl = (base64Uri: string): string => {
   }
 };
 
-const Welcome = ({ addScratch }: IWelcome) => {
+const Welcome = () => {
   const [tokenURIs, setTokenURIs] = useState<string[]>([]);
   const [owners, setOwners] = useState<string[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
@@ -89,13 +85,10 @@ const Welcome = ({ addScratch }: IWelcome) => {
     <div className="min-h-screen p-4 my-5 mx-auto max-w-4xl w-full">
       {/* Hero content */}
       <div className="flex flex-row justify-between items-center">
-        <PixelCastLogo fill="#9f6478" className="-ml-4 w-24 h-24" />
-        <button
-          onClick={addScratch}
-          className="bg-[#9f6478] text-white px-6 py-3 rounded-lg shadow-md hover:bg-[#633846] transition-all duration-300 font-bold"
-        >
-          Open Pixel Cast
-        </button>
+        <PixelCastLogo className="-ml-4 w-24 h-24" />
+        <a href="https://warpcast.com/joebaeda" className="bg-[#9f6478] text-white px-6 py-3 rounded-lg shadow-md hover:bg-[#633846] transition-all duration-300 font-bold">
+          Cast your Pixel
+        </a>
       </div>
       <div className="flex my-10 flex-col space-y-2 max-w-lg justify-center">
         <h1 className="text-4xl font-extrabold text-gray-800 mb-4 drop-shadow-md">

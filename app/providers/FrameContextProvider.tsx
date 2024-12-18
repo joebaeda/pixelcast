@@ -2,7 +2,7 @@ import sdk, { FrameContext } from '@farcaster/frame-sdk';
 import React from 'react';
 
 import { useFrameSplash } from './FrameSplashProvider';
-import Loading from '../components/Loading';
+import Welcome from '../components/Welcome';
 
 const FAKE_FRAME_CONTEXT: FrameContext | undefined =
   process.env.NODE_ENV === 'development'
@@ -64,11 +64,11 @@ function FrameContextProvider({ children }: React.PropsWithChildren) {
   }, [checkFrameContext, frameContext]);
 
   if (noFrameContextFound) {
-    return <Loading />;
+    return <Welcome />;
   }
 
   if (typeof frameContext === 'undefined') {
-    return <Loading />;
+    return <Welcome />;
   }
 
   return (
