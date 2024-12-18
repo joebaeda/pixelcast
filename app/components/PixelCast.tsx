@@ -43,14 +43,10 @@ const PixelCast = () => {
     }
   }, []);
 
-  // New function to get image blob from canvas
-  const getImageBlobFromCanvas = async (): Promise<Blob | null> => {
+  // New function to get image data URL from canvas
+  const getImageDataURLFromCanvas = (): string | null => {
     if (canvasRef.current) {
-      return new Promise((resolve) => {
-        canvasRef.current.toBlob((blob) => {
-          resolve(blob);
-        }, 'image/png');
-      });
+      return canvasRef.current.toDataURL('image/png');
     }
     return null;
   };
@@ -58,22 +54,18 @@ const PixelCast = () => {
   // Updated handleCast function
   const handleCast = useCallback(async () => {
     try {
-      const imageBlob = await getImageBlobFromCanvas();
-      if (imageBlob) {
-        const imageUrl = URL.createObjectURL(imageBlob);
+      const imageDataURL = getImageDataURLFromCanvas();
+      if (imageDataURL) {
         const castText = "Check out my PixelCast creation! Frame by @joebaeda";
         const encodedText = encodeURIComponent(castText);
-        const encodedImageUrl = encodeURIComponent(imageUrl);
+        const encodedImageUrl = encodeURIComponent(imageDataURL);
         
         const warpcastUrl = `https://warpcast.com/~/compose?text=${encodedText}&embeds[]=${encodedImageUrl}`;
         
         console.log('Opening Warpcast with URL:', warpcastUrl);
         await sdk.actions.openUrl(warpcastUrl);
-        
-        // Clean up the temporary URL after a delay
-        setTimeout(() => URL.revokeObjectURL(imageUrl), 60000); // 1 minute delay
       } else {
-        console.error("Failed to get image blob for casting.");
+        console.error("Failed to get image data URL for casting.");
       }
     } catch (error) {
       console.error("Error in handleCast:", error);
