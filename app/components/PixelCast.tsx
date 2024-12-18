@@ -46,10 +46,14 @@ const PixelCast = () => {
 
   // Handle Cast
   const handleCast = async () => {
-    const ipfsHash = await handleSaveImage()
-    if (ipfsHash) {
-      sdk.actions.openUrl(`https://warpcast.com/~/compose?text=this%20is%20really%20cool%20-%20just%20create%20one!&embeds[]=https://gateway.pinata.cloud/ipfs/${ipfsHash}`)
-      setNotifOnCast(true)
+    try {
+      const ipfsHash = await handleSaveImage()
+      if (ipfsHash) {
+        sdk.actions.openUrl(`https://warpcast.com/~/compose?text=this%20is%20really%20cool%20-%20just%20create%20one!&embeds[]=https://gateway.pinata.cloud/ipfs/${ipfsHash}`)
+        setNotifOnCast(true)
+      }
+    } catch (error) {
+      console.log(error)
     }
   }
 
