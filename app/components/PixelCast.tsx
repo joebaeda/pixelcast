@@ -43,9 +43,48 @@ const PixelCast = () => {
     }
   }, []);
 
+  // Handle Mint
+  const handleMint = async () => {
+    const ipfsHash = await handleSaveImage();
+    if (ipfsHash) {
+      writeContract({
+        abi: pixelCastAbi,
+        chainId: base.id,
+        address: pixelCastAddress,
+        functionName: 'mint',
+        value: parseEther('0.001'),
+        args: [`ipfs://${ipfsHash}`],
+      });
+
+      setEmbedHash(ipfsHash)
+
+    } else {
+      console.error("Failed to Mint Nft.");
+    }
+  };
+
+  // Save image to IPFS
+  const handleSaveImage = useCallback(async (): Promise<string | undefined> => {
+    if (canvasRef.current) {
+      try {
+        const dataURL = canvasRef.current.toDataURL('image/png');
+        const blob = await fetch(dataURL).then((res) => res.blob());
+        const formData = new FormData();
+        formData.append('file', blob, context?.user.username);
+
+        const response = await fetch('/api/upload', { method: 'POST', body: formData });
+        const data = await response.json();
+        if (response.ok) return data.ipfsHash;
+        else throw new Error(data.message || 'Upload failed.');
+      } catch (error) {
+        console.error("Error uploading image:", error);
+      }
+    }
+  },[context?.user.username]);
+
   // Handle Cast
-  const handleCast = useCallback(() => {
-    const ipfsHash = handleSaveImage();
+  const handleCast = useCallback(async () => {
+    const ipfsHash = await handleSaveImage();
     if (ipfsHash) {
       sdk.actions.openUrl(
         `https://warpcast.com/~/compose?text=This%20is%20really%20cool%20-%20Frame%20by%20@joebaeda&embeds[]=https://gateway.pinata.cloud/ipfs/${ipfsHash}`
@@ -53,8 +92,8 @@ const PixelCast = () => {
     } else {
       console.error("Failed to send cast.");
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    
+  }, [handleSaveImage]);
 
   // Load saved art on mount
   useEffect(() => {
@@ -109,48 +148,8 @@ const PixelCast = () => {
     }
   };
 
-  // Save image to IPFS
-  const handleSaveImage = async (): Promise<string | undefined> => {
-    if (canvasRef.current) {
-      try {
-        const dataURL = canvasRef.current.toDataURL('image/png');
-        const blob = await fetch(dataURL).then((res) => res.blob());
-        const formData = new FormData();
-        formData.append('file', blob, context?.user.username);
-
-        const response = await fetch('/api/upload', { method: 'POST', body: formData });
-        const data = await response.json();
-        if (response.ok) return data.ipfsHash;
-        else throw new Error(data.message || 'Upload failed.');
-      } catch (error) {
-        console.error("Error uploading image:", error);
-      }
-    }
-  };
-
   // Handle Color
   const handleColorChange = (color: string) => setSelectedColor(color);
-
-  // Handle Mint
-  const handleMint = async () => {
-    const ipfsHash = await handleSaveImage();
-    if (ipfsHash) {
-      writeContract({
-        abi: pixelCastAbi,
-        chainId: base.id,
-        address: pixelCastAddress,
-        functionName: 'mint',
-        value: parseEther('0.001'),
-        args: [`ipfs://${ipfsHash}`],
-      });
-
-      setEmbedHash(ipfsHash)
-
-    } else {
-      console.error("Failed to Mint Nft.");
-    }
-  };
-
 
   return (
     <div className="min-h-screen p-4 bg-gray-50 relative">
