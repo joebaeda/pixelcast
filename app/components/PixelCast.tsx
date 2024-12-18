@@ -3,8 +3,8 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import PixelGrid from './PixelGrid';
 import Header from './Header';
-import { useWaitForTransactionReceipt, useWriteContract } from 'wagmi';
-import sdk from '@farcaster/frame-sdk';
+import { useChainId, useWaitForTransactionReceipt, useWriteContract } from 'wagmi';
+import sdk, { FrameContext } from '@farcaster/frame-sdk';
 import { pixelCastAbi, pixelCastAddress } from '@/lib/contract';
 import { base } from 'wagmi/chains';
 import { parseEther } from 'viem';
@@ -12,61 +12,40 @@ import { SketchPicker } from 'react-color';
 import { Palette, Trash2 } from 'lucide-react';
 import CastButton from './CastButton';
 import BaseButton from './BaseButton';
+import Loading from './Loading';
+import Welcome from './Welcome';
+import ConfirmedModal from './ConfirmedModal';
 
-interface IProfile {
-  username: string;
-  pfp: string;
-}
-
-const PixelCast = ({ username, pfp }: IProfile) => {
+const PixelCast = () => {
   const [selectedColor, setSelectedColor] = useState('#000000');
+  const [showColorPicker, setShowColorPicker] = useState(false);
   const canvasRef = useRef<HTMLCanvasElement>(null!);
+  const [embedHash, setEmbedHash] = useState("");
+  const [isSDKLoaded, setIsSDKLoaded] = useState(false);
+  const [context, setContext] = useState<FrameContext>();
 
-  // Wagmi hooks
+  // Wagmi
+  const chainId = useChainId();
   const { data: hash, isPending, writeContract } = useWriteContract();
   const { isLoading: isConfirming, isSuccess: isConfirmed } = useWaitForTransactionReceipt({ hash });
 
-  const [showColorPicker, setShowColorPicker] = useState(false);
-  const [showTransactionModal, setShowTransactionModal] = useState(false);
-  const [modalMessage, setModalMessage] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (isPending) {
-      setModalMessage("Confirming...");
-      setShowTransactionModal(true);
-    } else if (isConfirming) {
-      setModalMessage("Waiting...");
-      setShowTransactionModal(true);
-    } else if (isConfirmed) {
-      setModalMessage("Transaction Confirmed! Success 🎉");
-      setShowTransactionModal(true);
-    } else {
-      setModalMessage(null);
+  // Basescan
+  const linkToBaseScan = useCallback((hash?: string) => {
+    if (hash) {
+      sdk.actions.openUrl(`https://basescan.org/tx/${hash}`);
     }
-  }, [isPending, isConfirming, isConfirmed, modalMessage]);
+  }, []);
 
-  // Save image to IPFS
-  const handleSaveImage = async (): Promise<string | undefined> => {
-    if (canvasRef.current) {
-      try {
-        const dataURL = canvasRef.current.toDataURL('image/png');
-        const blob = await fetch(dataURL).then((res) => res.blob());
-        const formData = new FormData();
-        formData.append('file', blob, username);
-
-        const response = await fetch('/api/upload', { method: 'POST', body: formData });
-        const data = await response.json();
-        if (response.ok) return data.ipfsHash;
-        else throw new Error(data.message || 'Upload failed.');
-      } catch (error) {
-        console.error("Error uploading image:", error);
-      }
+  // Warpcast
+  const linkToWarpcast = useCallback((ipfs?: string) => {
+    if (ipfs) {
+      sdk.actions.openUrl(`https://warpcast.com/~/compose?text=this%20is%20really%20cool%20-%20just%20minted%20one!&embeds[]=https://gateway.pinata.cloud/ipfs/${ipfs}`);
     }
-  };
+  }, []);
 
-  // Handle casting an image
-  const handleCast = useCallback(async () => {
-    const ipfsHash = await handleSaveImage();
+  // Handle Cast
+  const handleCast = useCallback(() => {
+    const ipfsHash = handleSaveImage();
     if (ipfsHash) {
       sdk.actions.openUrl(
         `https://warpcast.com/~/compose?text=This%20is%20really%20cool%20-%20Frame%20by%20@joebaeda&embeds[]=https://gateway.pinata.cloud/ipfs/${ipfsHash}`
@@ -76,33 +55,6 @@ const PixelCast = ({ username, pfp }: IProfile) => {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  // Handle minting a token
-  const handleMint = async () => {
-    const ipfsHash = await handleSaveImage();
-    if (ipfsHash) {
-      writeContract({
-        abi: pixelCastAbi,
-        chainId: base.id,
-        address: pixelCastAddress,
-        functionName: 'mint',
-        value: parseEther('0.001'),
-        args: [`ipfs://${ipfsHash}`],
-      });
-
-    } else {
-      console.error("Failed to Mint Nft.");
-    }
-  };
-
-  // Clear canvas
-  const handleClearCanvas = () => {
-    if (canvasRef.current) {
-      const ctx = canvasRef.current.getContext('2d');
-      ctx?.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
-      localStorage.removeItem('pixelArt');
-    }
-  };
 
   // Load saved art on mount
   useEffect(() => {
@@ -117,8 +69,88 @@ const PixelCast = ({ username, pfp }: IProfile) => {
     }
   }, []);
 
-  // Handle color change
+  // Farcaster
+  useEffect(() => {
+    const load = async () => {
+      const frameContext = await sdk.context;
+      setContext(frameContext);
+      await sdk.actions.ready();
+    };
+    if (sdk && !isSDKLoaded) {
+      setIsSDKLoaded(true);
+      load();
+    }
+  }, [isSDKLoaded]);
+
+  const addScratch = useCallback(async () => {
+    try {
+
+      await sdk.actions.addFrame();
+
+    } catch (error) {
+      console.log(`Error: ${error}`);
+    }
+  }, []);
+
+  if (!isSDKLoaded) {
+    return <Loading />;
+  }
+
+  if (isSDKLoaded && !context?.client.added) {
+    return <Welcome addScratch={addScratch} />
+  }
+
+  // Clear canvas
+  const handleClearCanvas = () => {
+    if (canvasRef.current) {
+      const ctx = canvasRef.current.getContext('2d');
+      ctx?.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
+      localStorage.removeItem('pixelArt');
+    }
+  };
+
+  // Save image to IPFS
+  const handleSaveImage = async (): Promise<string | undefined> => {
+    if (canvasRef.current) {
+      try {
+        const dataURL = canvasRef.current.toDataURL('image/png');
+        const blob = await fetch(dataURL).then((res) => res.blob());
+        const formData = new FormData();
+        formData.append('file', blob, context?.user.username);
+
+        const response = await fetch('/api/upload', { method: 'POST', body: formData });
+        const data = await response.json();
+        if (response.ok) return data.ipfsHash;
+        else throw new Error(data.message || 'Upload failed.');
+      } catch (error) {
+        console.error("Error uploading image:", error);
+      }
+    }
+  };
+
+  // Handle Color
   const handleColorChange = (color: string) => setSelectedColor(color);
+
+  // Handle Mint
+  const handleMint = async () => {
+    const ipfsHash = await handleSaveImage();
+    if (ipfsHash) {
+      writeContract({
+        abi: pixelCastAbi,
+        chainId: base.id,
+        address: pixelCastAddress,
+        functionName: 'mint',
+        value: parseEther('0.001'),
+        args: [`ipfs://${ipfsHash}`],
+      });
+
+      setEmbedHash(ipfsHash)
+
+    } else {
+      console.error("Failed to Mint Nft.");
+    }
+  };
+
 
   return (
     <div className="min-h-screen p-4 bg-gray-50 relative">
@@ -144,7 +176,7 @@ const PixelCast = ({ username, pfp }: IProfile) => {
           >
             <Palette className="w-8 h-8 text-gray-200" />
           </button>
-          <Header username={username} pfp={pfp} />
+          <Header username={context?.user.username as string} pfp={context?.user.pfpUrl as string} />
         </div>
       </div>
 
@@ -165,7 +197,7 @@ const PixelCast = ({ username, pfp }: IProfile) => {
 
           {/* Make a Cast */}
           <button
-            disabled={isConfirming || isPending}
+            disabled={isPending}
             onClick={handleCast}
             className="w-full sm:w-auto flex-1 p-3 rounded-xl bg-gradient-to-r from-[#4f2d61] to-[#30173d] shadow-lg flex flex-row sm:justify-start justify-center items-center gap-3 hover:scale-105 transition-transform disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-purple-300"
           >
@@ -175,12 +207,15 @@ const PixelCast = ({ username, pfp }: IProfile) => {
 
           {/* Mint Pixel Cast */}
           <button
-            disabled={isConfirming || isPending}
+            disabled={chainId !== base.id || isPending || isConfirming}
             onClick={handleMint}
             className="w-full sm:w-auto flex-1 p-3 rounded-xl bg-gradient-to-r from-[#4f2d61] to-[#2f1b3a] shadow-lg flex flex-row sm:justify-start justify-center items-center gap-3 hover:scale-105 transition-transform disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-purple-300"
           >
-            <BaseButton className="w-8 h-8" />
-            <p className="text-white text-lg font-semibold">Mint it Now!</p>
+            {isPending ? "Confirming..." : isConfirming ? "Waiting..." : <>
+              <BaseButton className="w-8 h-8" />
+              <p className="text-white text-lg font-semibold">Mint it Now!</p>
+            </>
+            }
           </button>
 
         </div>
@@ -203,12 +238,9 @@ const PixelCast = ({ username, pfp }: IProfile) => {
         </div>
       )}
 
-      {showTransactionModal && modalMessage && (
-        <div className="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50">
-          <div className="flex flex-col items-center bg-white p-6 rounded-lg shadow-lg">
-            <p className="text-lg font-bold">{modalMessage}</p>
-          </div>
-        </div>
+      {/* Transaction Success */}
+      {isConfirmed && (
+        <ConfirmedModal ipfs={embedHash} username={context?.user.username as string} hash={hash as string} linkToBaseScan={(hash) => linkToBaseScan(hash)} linkToWarpcast={(embedHash) => linkToWarpcast(embedHash)} />
       )}
 
     </div>
