@@ -141,7 +141,7 @@ const PixelCast = () => {
 
       // Create FormData for Pinata upload
       const formData = new FormData();
-      formData.append('file', blob, `${context?.user.username}.png || pixelcast.png`);
+      formData.append('file', blob, "pixelcast.png");
       try {
 
         const response = await fetch('/api/upload', {
