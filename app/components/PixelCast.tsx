@@ -43,22 +43,41 @@ const PixelCast = () => {
     }
   }, []);
 
-  // Handle Cast
+  // New function to get image blob from canvas
+  const getImageBlobFromCanvas = async (): Promise<Blob | null> => {
+    if (canvasRef.current) {
+      return new Promise((resolve) => {
+        canvasRef.current.toBlob((blob) => {
+          resolve(blob);
+        }, 'image/png');
+      });
+    }
+    return null;
+  };
+
+  // Updated handleCast function
   const handleCast = useCallback(async () => {
     try {
-      const ipfsHash = await handleSaveImage();
-      if (ipfsHash) {
-        console.log('Casting with IPFS hash:', ipfsHash);
-        await sdk.actions.openUrl(
-          `https://warpcast.com/~/compose?text=This%20is%20really%20cool%20-%20Frame%20by%20@joebaeda&embeds[]=https://gateway.pinata.cloud/ipfs/${ipfsHash}`
-        );
+      const imageBlob = await getImageBlobFromCanvas();
+      if (imageBlob) {
+        const imageUrl = URL.createObjectURL(imageBlob);
+        const castText = "Check out my PixelCast creation! Frame by @joebaeda";
+        const encodedText = encodeURIComponent(castText);
+        const encodedImageUrl = encodeURIComponent(imageUrl);
+        
+        const warpcastUrl = `https://warpcast.com/~/compose?text=${encodedText}&embeds[]=${encodedImageUrl}`;
+        
+        console.log('Opening Warpcast with URL:', warpcastUrl);
+        await sdk.actions.openUrl(warpcastUrl);
+        
+        // Clean up the temporary URL after a delay
+        setTimeout(() => URL.revokeObjectURL(imageUrl), 60000); // 1 minute delay
       } else {
-        console.error("Failed to get IPFS hash for casting.");
+        console.error("Failed to get image blob for casting.");
       }
     } catch (error) {
       console.error("Error in handleCast:", error);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Load saved art on mount
