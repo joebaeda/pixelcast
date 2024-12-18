@@ -66,40 +66,32 @@ const PixelCast = ({ username, pfp }: IProfile) => {
 
   // Handle casting an image
   const handleCast = useCallback(async () => {
-    try {
-      const ipfsHash = await handleSaveImage();
-      if (ipfsHash) {
-        sdk.actions.openUrl(
-          `https://warpcast.com/~/compose?text=This%20is%20really%20cool%20-%20Frame%20by%20@joebaeda&embeds[]=https://gateway.pinata.cloud/ipfs/${ipfsHash}`
-        );
-      } else {
-        console.error("Failed to send cast.");
-      }
-    } catch (error) {
-      console.error("Error casting image:", error);
+    const ipfsHash = await handleSaveImage();
+    if (ipfsHash) {
+      sdk.actions.openUrl(
+        `https://warpcast.com/~/compose?text=This%20is%20really%20cool%20-%20Frame%20by%20@joebaeda&embeds[]=https://gateway.pinata.cloud/ipfs/${ipfsHash}`
+      );
+    } else {
+      console.error("Failed to send cast.");
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Handle minting a token
   const handleMint = async () => {
-    try {
-      const ipfsHash = await handleSaveImage();
-      if (ipfsHash) {
-        writeContract({
-          abi: pixelCastAbi,
-          chainId: base.id,
-          address: pixelCastAddress,
-          functionName: 'mint',
-          value: parseEther('0.001'),
-          args: [`ipfs://${ipfsHash}`],
-        });
+    const ipfsHash = await handleSaveImage();
+    if (ipfsHash) {
+      writeContract({
+        abi: pixelCastAbi,
+        chainId: base.id,
+        address: pixelCastAddress,
+        functionName: 'mint',
+        value: parseEther('0.001'),
+        args: [`ipfs://${ipfsHash}`],
+      });
 
-      } else {
-        console.error("Failed to upload drawing to IPFS.");
-      }
-    } catch (error) {
-      console.error("Error minting image:", error);
+    } else {
+      console.error("Failed to Mint Nft.");
     }
   };
 
