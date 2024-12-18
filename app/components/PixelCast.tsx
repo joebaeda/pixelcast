@@ -4,7 +4,8 @@ import { useState, useRef, useEffect, useCallback } from 'react';
 import PixelGrid from './PixelGrid';
 import Header from './Header';
 import { useChainId, useWaitForTransactionReceipt, useWriteContract } from 'wagmi';
-import sdk, { FrameContext } from '@farcaster/frame-sdk';
+import sdk from '@farcaster/frame-sdk';
+import { useViewer } from '../providers/FrameContextProvider';
 import { pixelCastAbi, pixelCastAddress } from '@/lib/contract';
 import { base } from 'wagmi/chains';
 import { parseEther } from 'viem';
@@ -12,7 +13,6 @@ import { SketchPicker } from 'react-color';
 import { Palette, Trash2 } from 'lucide-react';
 import CastButton from './CastButton';
 import BaseButton from './BaseButton';
-import Loading from './Loading';
 import ConfirmedModal from './ConfirmedModal';
 
 const PixelCast = () => {
@@ -20,9 +20,8 @@ const PixelCast = () => {
   const [showColorPicker, setShowColorPicker] = useState(false);
   const canvasRef = useRef<HTMLCanvasElement>(null!);
   const [embedHash, setEmbedHash] = useState("");
-  const [isSDKLoaded, setIsSDKLoaded] = useState(false);
-  const [context, setContext] = useState<FrameContext>();
   const [notifOnCast, setNotifOnCast] = useState(false);
+  const { fid, username, pfpUrl } = useViewer();
 
   // Wagmi
   const chainId = useChainId();
@@ -59,7 +58,7 @@ const PixelCast = () => {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-              fid: context?.user.fid,
+              fid: fid,
               title: "Congratulations 🎉",
               body: "One Awesome Scratch of Art has been created.",
             }),
@@ -70,7 +69,7 @@ const PixelCast = () => {
       };
       notifyUser();
     }
-  }, [context?.user.fid, isConfirmed, notifOnCast])
+  }, [fid, isConfirmed, notifOnCast])
 
   // Load saved art on mount
   useEffect(() => {
@@ -84,23 +83,6 @@ const PixelCast = () => {
       img.src = savedArt;
     }
   }, []);
-
-  // Farcaster
-  useEffect(() => {
-    const load = async () => {
-      const frameContext = await sdk.context;
-      setContext(frameContext);
-      await sdk.actions.ready();
-    };
-    if (sdk && !isSDKLoaded) {
-      setIsSDKLoaded(true);
-      load();
-    }
-  }, [isSDKLoaded]);
-
-  if (!isSDKLoaded) {
-    return <Loading />;
-  }
 
   // Clear canvas
   const handleClearCanvas = () => {
@@ -194,7 +176,7 @@ const PixelCast = () => {
           >
             <Palette className="w-8 h-8 text-gray-200" />
           </button>
-          <Header username={context?.user.username as string} pfp={context?.user.pfpUrl as string} />
+          <Header username={username as string} pfp={pfpUrl as string} />
         </div>
       </div>
 
@@ -258,7 +240,7 @@ const PixelCast = () => {
 
       {/* Transaction Success */}
       {isConfirmed && (
-        <ConfirmedModal ipfs={embedHash} username={context?.user.username as string} hash={hash as string} linkToBaseScan={(hash) => linkToBaseScan(hash)} linkToWarpcast={(embedHash) => linkToWarpcast(embedHash)} />
+        <ConfirmedModal ipfs={embedHash} username={username as string} hash={hash as string} linkToBaseScan={(hash) => linkToBaseScan(hash)} linkToWarpcast={(embedHash) => linkToWarpcast(embedHash)} />
       )}
 
     </div>

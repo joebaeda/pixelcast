@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import Provider from "./components/Provider";
+import Provider from "./providers/Provider";
 
 const frame = {
   version: "next",
@@ -59,13 +59,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <Provider>
-        <body
-          className="font-sans antialiased"
-        >
+      <body className="font-sans antialiased">
+        <Provider>
           <main>{children}</main>
-        </body>
-      </Provider>
+        </Provider>
+      </body>
     </html>
   );
 }
