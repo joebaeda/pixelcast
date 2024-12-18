@@ -70,17 +70,24 @@ const PixelCast = () => {
         const dataURL = canvasRef.current.toDataURL('image/png');
         const blob = await fetch(dataURL).then((res) => res.blob());
         const formData = new FormData();
-        formData.append('file', blob, context?.user.username);
-
+        const username = context?.user?.username || "pixelcast";
+        formData.append('file', blob, username);
+  
         const response = await fetch('/api/upload', { method: 'POST', body: formData });
+        
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({}));
+          throw new Error(errorData.message || `Error ${response.status}`);
+        }
+  
         const data = await response.json();
-        if (response.ok) return data.ipfsHash;
-        else throw new Error(data.message || 'Upload failed.');
+        return data.ipfsHash;
       } catch (error) {
         console.error("Error uploading image:", error);
       }
     }
-  },[context?.user.username]);
+  }, [context?.user.username]);
+  
 
   // Handle Cast
   const handleCast = useCallback(async () => {
