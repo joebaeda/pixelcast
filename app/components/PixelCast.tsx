@@ -64,43 +64,85 @@ const PixelCast = () => {
   };
 
   // Save image to IPFS
-  const handleSaveImage = useCallback(async (): Promise<string | undefined> => {
-    if (canvasRef.current) {
-      try {
-        const dataURL = canvasRef.current.toDataURL('image/png');
-        const blob = await fetch(dataURL).then((res) => res.blob());
-        const formData = new FormData();
-        const username = context?.user?.username || "pixelcast";
-        formData.append('file', blob, username);
-  
-        const response = await fetch('/api/upload', { method: 'POST', body: formData });
-        
-        if (!response.ok) {
-          const errorData = await response.json().catch(() => ({}));
-          throw new Error(errorData.message || `Error ${response.status}`);
-        }
-  
-        const data = await response.json();
-        return data.ipfsHash;
-      } catch (error) {
-        console.error("Error uploading image:", error);
-      }
+  const handleSaveImage = async (): Promise<string | undefined> => {
+    if (!canvasRef.current) {
+      console.error("Canvas reference is missing.");
+      return;
     }
-  }, [context?.user.username]);
+  
+    try {
+      // Convert the canvas content to a data URL and blob
+      const dataURL = canvasRef.current.toDataURL('image/png');
+      const blob = await fetch(dataURL).then((res) => res.blob());
+  
+      // Create FormData and append the file
+      const formData = new FormData();
+      const username = context?.user?.username || 'pixelcast';
+      formData.append('file', blob, username);
+  
+      // Send the POST request to the /api/upload endpoint
+      const response = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData,
+      });
+  
+      // Parse the response
+      if (response.ok) {
+        const data = await response.json();
+        return data.ipfsHash; // Return the IPFS hash if successful
+      } else {
+        // Handle errors in the response
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || `Error ${response.status}`);
+      }
+    } catch (error) {
+      console.error("Error uploading image:", error);
+    }
+  };
+  
   
 
   // Handle Cast
   const handleCast = useCallback(async () => {
-    const ipfsHash = await handleSaveImage();
-    if (ipfsHash) {
-      sdk.actions.openUrl(
-        `https://warpcast.com/~/compose?text=This%20is%20really%20cool%20-%20Frame%20by%20@joebaeda&embeds[]=https://gateway.pinata.cloud/ipfs/${ipfsHash}`
-      );
-    } else {
-      console.error("Failed to send cast.");
+    if (!canvasRef.current) {
+      console.error("Canvas reference is missing.");
+      return;
     }
-    
-  }, [handleSaveImage]);
+  
+    try {
+      // Save image to IPFS
+      const dataURL = canvasRef.current.toDataURL("image/png");
+      const blob = await fetch(dataURL).then((res) => res.blob());
+      const formData = new FormData();
+      const username = context?.user?.username || "pixelcast";
+      formData.append("file", blob, username);
+  
+      const response = await fetch("/api/upload", {
+        method: "POST",
+        body: formData,
+      });
+  
+      let ipfsHash;
+      if (response.ok) {
+        const data = await response.json();
+        ipfsHash = data.ipfsHash;
+      } else {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || `Error ${response.status}`);
+      }
+  
+      if (ipfsHash) {
+        sdk.actions.openUrl(
+          `https://warpcast.com/~/compose?text=This%20is%20really%20cool%20-%20Frame%20by%20@joebaeda&embeds[]=https://gateway.pinata.cloud/ipfs/${ipfsHash}`
+        );
+      } else {
+        console.error("Failed to send cast.");
+      }
+    } catch (error) {
+      console.error("Error handling cast:", error);
+    }
+  }, [context?.user?.username]);
+  
 
   // Load saved art on mount
   useEffect(() => {
