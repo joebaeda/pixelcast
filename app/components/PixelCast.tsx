@@ -9,7 +9,7 @@ import { pixelCastAbi, pixelCastAddress } from '@/lib/contract';
 import { base } from 'wagmi/chains';
 import { parseEther } from 'viem';
 import { SketchPicker } from 'react-color';
-import { EllipsisVertical, Palette, Trash2 } from 'lucide-react';
+import { Palette, Trash2 } from 'lucide-react';
 import CastButton from './CastButton';
 import BaseButton from './BaseButton';
 
@@ -29,7 +29,6 @@ const PixelCast = ({ username, pfp }: IProfile) => {
   const [showColorPicker, setShowColorPicker] = useState(false);
   const [showTransactionModal, setShowTransactionModal] = useState(false);
   const [modalMessage, setModalMessage] = useState<string | null>(null);
-  const [showToolBar, setShowToolBar] = useState(false);
 
   useEffect(() => {
     if (isPending) {
@@ -130,20 +129,74 @@ const PixelCast = ({ username, pfp }: IProfile) => {
   const handleColorChange = (color: string) => setSelectedColor(color);
 
   return (
-    <div className="bg-gray-50">
+    <div className="min-h-screen p-4 bg-gray-50 relative">
 
-      <Header username={username} pfp={pfp} />
+      {/* Header Section */}
+      <div className="w-full flex mb-10 flex-row justify-between">
+        <div>
+          {/* Delete Pixel */}
+          <button
+            disabled={isConfirming || isPending}
+            onClick={handleClearCanvas}
+            className="rounded-xl bg-[#4f2d61] p-2 disabled:opacity-50"
+          >
+            <Trash2 className="w-8 h-8 text-gray-200" />
+          </button>
+        </div>
+        <div className="flex flex-row space-x-4">
+          {/* Color picker */}
+          <button
+            disabled={isConfirming || isPending}
+            onClick={() => setShowColorPicker(true)}
+            className="rounded-xl bg-[#4f2d61] p-2 disabled:opacity-50"
+          >
+            <Palette className="w-8 h-8 text-gray-200" />
+          </button>
+          <Header username={username} pfp={pfp} />
+        </div>
+      </div>
 
-      {/* Canvas */}
-      <PixelGrid
-        gridSize={{ width: 48, height: 48 }}
-        selectedColor={selectedColor}
-        canvasRef={canvasRef}
-      />
+      {/* Canvas Section */}
+      <div className="flex max-w-[384px] mx-auto flex-col mb-10 space-y-6 items-center justify-center">
+
+        {/* Canvas */}
+        <div className="flex items-center justify-center">
+          <PixelGrid
+            gridSize={{ width: 48, height: 48 }}
+            selectedColor={selectedColor}
+            canvasRef={canvasRef}
+          />
+        </div>
+
+        {/* Buttons Section */}
+        <div className="w-full flex flex-col sm:flex-row justify-between items-center gap-4 mt-4">
+
+          {/* Make a Cast */}
+          <button
+            disabled={isConfirming || isPending}
+            onClick={handleCast}
+            className="w-full sm:w-auto flex-1 p-3 rounded-xl bg-gradient-to-r from-[#4f2d61] to-[#30173d] shadow-lg flex flex-row sm:justify-start justify-center items-center gap-3 hover:scale-105 transition-transform disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-purple-300"
+          >
+            <CastButton className="w-8 h-8" />
+            <p className="text-white text-lg font-semibold">Cast it Now!</p>
+          </button>
+
+          {/* Mint Pixel Cast */}
+          <button
+            disabled={isConfirming || isPending}
+            onClick={handleMint}
+            className="w-full sm:w-auto flex-1 p-3 rounded-xl bg-gradient-to-r from-[#4f2d61] to-[#2f1b3a] shadow-lg flex flex-row sm:justify-start justify-center items-center gap-3 hover:scale-105 transition-transform disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-purple-300"
+          >
+            <BaseButton className="w-8 h-8" />
+            <p className="text-white text-lg font-semibold">Mint it Now!</p>
+          </button>
+
+        </div>
+      </div>
 
       {showColorPicker && (
-        <div className="fixed inset-0 flex items-center justify-center z-10 bg-gray-900 bg-opacity-50">
-          <div className="flex space-y-4 flex-col bg-white p-4 rounded-md shadow-lg">
+        <div className="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50">
+          <div className="flex flex-col space-y-4 bg-white p-4 rounded-md shadow-lg">
             <SketchPicker
               color={selectedColor}
               onChange={(color) => handleColorChange(color.hex)}
@@ -159,69 +212,15 @@ const PixelCast = ({ username, pfp }: IProfile) => {
       )}
 
       {showTransactionModal && modalMessage && (
-        <div className="fixed inset-0 flex items-center justify-center z-10 bg-gray-900 bg-opacity-50">
+        <div className="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50">
           <div className="flex flex-col items-center bg-white p-6 rounded-lg shadow-lg">
             <p className="text-lg font-bold">{modalMessage}</p>
           </div>
         </div>
       )}
 
-      {/* Toolbar */}
-      {showToolBar ? (
-        <div className="absolute flex flex-col space-y-6 top-4 left-4">
-          
-          <button
-            disabled={isConfirming || isPending}
-            onClick={() => setShowToolBar(false)}
-            className="rounded-xl bg-[#4f2d61] p-2 disabled:opacity-50"
-          >
-            <EllipsisVertical className="w-6 h-6 text-gray-200" />
-          </button>
-
-          <button
-            disabled={isConfirming || isPending}
-            onClick={() => setShowColorPicker(true)}
-            className="rounded-xl bg-[#4f2d61] p-2 disabled:opacity-50"
-          >
-            <Palette className="w-6 h-6 text-gray-200" />
-          </button>
-
-          <button
-            disabled={isConfirming || isPending}
-            onClick={handleCast}
-            className="rounded-xl bg-[#4f2d61] p-2 disabled:opacity-50"
-          >
-            <CastButton className="w-6 h-6" />
-          </button>
-
-          <button
-            disabled={isConfirming || isPending}
-            onClick={handleMint}
-            className="rounded-xl bg-[#4f2d61] p-2 disabled:opacity-50"
-          >
-            <BaseButton className="w-6 h-6" />
-          </button>
-
-          <button
-            disabled={isConfirming || isPending}
-            onClick={handleClearCanvas}
-            className="rounded-xl bg-[#4f2d61] p-2 disabled:opacity-50"
-          >
-            <Trash2 className="w-6 h-6 text-gray-200" />
-          </button>
-        </div>
-      ) : (
-        <div className="absolute flex flex-col top-4 left-4">
-          <button
-            onClick={() => setShowToolBar(true)}
-            className="rounded-xl bg-[#4f2d61] p-2 disabled:opacity-50"
-          >
-            <EllipsisVertical className="w-6 h-6 text-gray-200" />
-          </button>
-        </div>
-      )}
-
     </div>
+
   );
 };
 

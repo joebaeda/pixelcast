@@ -79,18 +79,15 @@ const PixelGrid = ({ gridSize, selectedColor, canvasRef }: PixelGridProps) => {
   }
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center">
-      <div className="flex items-center justify-center p-4">
+    
         <canvas
           ref={canvasRef}
-          className="w-full block bg-gray-200 shadow-inner touch-none"
+          className="block w-[384px] h-[384px] aspect-square bg-gray-200 shadow-inner touch-none"
           onPointerDown={handlePointerDown}
           onPointerMove={handlePointerMove}
           onPointerUp={handlePointerUp}
           onPointerLeave={handlePointerUp}
         />
-      </div>
-    </div>
   )
 }
 
