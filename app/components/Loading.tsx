@@ -1,4 +1,4 @@
-import LoadingAnimation from "./LoadingAnimation"
+import LoadingAnimation from "../icons/LoadingAnimation"
 
 const Loading = () => {
     return (

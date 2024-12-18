@@ -8,7 +8,7 @@ interface IConfirmed {
     linkToWarpcast: (ipfs: string) => void
 }
 
-const ConfirmedModal = ({ ipfs, username, hash, linkToBaseScan, linkToWarpcast }: IConfirmed) => {
+const Transaction = ({ ipfs, username, hash, linkToBaseScan, linkToWarpcast }: IConfirmed) => {
     return (
         <div className="fixed inset-0 flex items-center justify-center z-10 bg-gray-900 bg-opacity-50">
             <div className="flex flex-col items-center bg-white rounded-2xl shadow-lg w-[90%] max-w-[360px] aspect-square p-4 space-y-5">
@@ -39,4 +39,4 @@ const ConfirmedModal = ({ ipfs, username, hash, linkToBaseScan, linkToWarpcast }
     )
 }
 
-export default ConfirmedModal;
+export default Transaction;

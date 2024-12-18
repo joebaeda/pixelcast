@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect, useCallback } from 'react';
 import PixelGrid from './PixelGrid';
-import Header from './Header';
+import Image from "next/image";
 import { useChainId, useWaitForTransactionReceipt, useWriteContract } from 'wagmi';
 import sdk from '@farcaster/frame-sdk';
 import { useViewer } from '../providers/FrameContextProvider';
@@ -11,16 +11,14 @@ import { base } from 'wagmi/chains';
 import { parseEther } from 'viem';
 import { SketchPicker } from 'react-color';
 import { Palette, Trash2 } from 'lucide-react';
-import CastButton from './CastButton';
-import BaseButton from './BaseButton';
-import ConfirmedModal from './ConfirmedModal';
+import BaseButton from '../icons/BaseButton';
+import Transaction from './Transactions';
 
 const PixelCast = () => {
   const [selectedColor, setSelectedColor] = useState('#000000');
   const [showColorPicker, setShowColorPicker] = useState(false);
   const canvasRef = useRef<HTMLCanvasElement>(null!);
   const [embedHash, setEmbedHash] = useState("");
-  const [notifOnCast, setNotifOnCast] = useState(false);
   const { fid, username, pfpUrl } = useViewer();
 
   // Wagmi
@@ -42,15 +40,9 @@ const PixelCast = () => {
     }
   }, []);
 
-  // Handle Cast
-  const handleCast = () => {
-      sdk.actions.openUrl("https://warpcast.com/~/compose?text=this%20is%20really%20cool%20-%20just%20create%20one!&embeds[]=https://pixelcast.vercel.app")
-      setNotifOnCast(true)
-  }
-
   // Create Notifications
   useEffect(() => {
-    if (isConfirmed || notifOnCast) {
+    if (isConfirmed) {
       // Notify user
       async function notifyUser() {
         try {
@@ -60,7 +52,7 @@ const PixelCast = () => {
             body: JSON.stringify({
               fid: fid,
               title: "Congratulations 🎉",
-              body: "One Awesome Scratch of Art has been created.",
+              body: "One Awesome Pixel Art has been created!",
             }),
           });
         } catch (error) {
@@ -69,20 +61,21 @@ const PixelCast = () => {
       };
       notifyUser();
     }
-  }, [fid, isConfirmed, notifOnCast])
+  }, [fid, isConfirmed])
 
   // Load saved art on mount
   useEffect(() => {
     const savedArt = localStorage.getItem('pixelArt');
     if (savedArt && canvasRef.current) {
-      const img = new Image();
-      img.onload = () => {
+      const imgElement = new window.Image(); // Avoid conflict by explicitly using window.Image
+      imgElement.onload = () => {
         const ctx = canvasRef.current?.getContext('2d');
-        ctx?.drawImage(img, 0, 0);
+        ctx?.drawImage(imgElement, 0, 0);
       };
-      img.src = savedArt;
+      imgElement.src = savedArt;
     }
   }, []);
+
 
   // Clear canvas
   const handleClearCanvas = () => {
@@ -157,18 +150,18 @@ const PixelCast = () => {
 
       {/* Header Section */}
       <div className="w-full flex mb-10 flex-row justify-between">
-        <div>
-          {/* Delete Pixel */}
-          <button
-            disabled={isConfirming || isPending}
-            onClick={handleClearCanvas}
-            className="rounded-xl bg-[#4f2d61] p-2 disabled:opacity-50"
-          >
-            <Trash2 className="w-8 h-8 text-gray-200" />
-          </button>
-        </div>
+
+        {/* Delete Pixel */}
+        <button
+          disabled={isConfirming || isPending}
+          onClick={handleClearCanvas}
+          className="rounded-xl bg-[#4f2d61] p-2 disabled:opacity-50"
+        >
+          <Trash2 className="w-8 h-8 text-gray-200" />
+        </button>
+
+        {/* Color picker & Profile */}
         <div className="flex flex-row space-x-4">
-          {/* Color picker */}
           <button
             disabled={isConfirming || isPending}
             onClick={() => setShowColorPicker(true)}
@@ -176,8 +169,12 @@ const PixelCast = () => {
           >
             <Palette className="w-8 h-8 text-gray-200" />
           </button>
-          <Header username={username as string} pfp={pfpUrl as string} />
+          <div className="flex bg-[#4f2d61] text-white rounded-2xl flex-row justify-between items-center gap-2">
+            <Image className="object-cover rounded-l-2xl" src={pfpUrl as string} alt={username as string} width={50} height={50} priority />
+            <p className="font-bold pr-3">{username}</p>
+          </div>
         </div>
+
       </div>
 
       {/* Canvas Section */}
@@ -195,16 +192,6 @@ const PixelCast = () => {
         {/* Buttons Section */}
         <div className="w-full flex flex-col sm:flex-row justify-between items-center gap-4 mt-4">
 
-          {/* Make a Cast */}
-          <button
-            disabled={isPending}
-            onClick={handleCast}
-            className="w-full sm:w-auto flex-1 p-3 rounded-xl bg-gradient-to-r from-[#4f2d61] to-[#30173d] shadow-lg flex flex-row sm:justify-start justify-center items-center gap-3 hover:scale-105 transition-transform disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-purple-300"
-          >
-            <CastButton className="w-8 h-8" />
-            <p className="text-white text-lg font-semibold">Cast it Now!</p>
-          </button>
-
           {/* Mint Pixel Cast */}
           <button
             disabled={chainId !== base.id || isPending || isConfirming}
@@ -213,7 +200,7 @@ const PixelCast = () => {
           >
             {isPending ? "Confirming..." : isConfirming ? "Waiting..." : <>
               <BaseButton className="w-8 h-8" />
-              <p className="text-white text-lg font-semibold">Mint it Now!</p>
+              <p className="text-white text-lg font-semibold">Mint to Base</p>
             </>
             }
           </button>
@@ -240,7 +227,7 @@ const PixelCast = () => {
 
       {/* Transaction Success */}
       {isConfirmed && (
-        <ConfirmedModal ipfs={embedHash} username={username as string} hash={hash as string} linkToBaseScan={(hash) => linkToBaseScan(hash)} linkToWarpcast={(embedHash) => linkToWarpcast(embedHash)} />
+        <Transaction ipfs={embedHash} username={username as string} hash={hash as string} linkToBaseScan={(hash) => linkToBaseScan(hash)} linkToWarpcast={(embedHash) => linkToWarpcast(embedHash)} />
       )}
 
     </div>
