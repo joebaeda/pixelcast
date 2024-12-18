@@ -13,7 +13,6 @@ import { Palette, Trash2 } from 'lucide-react';
 import CastButton from './CastButton';
 import BaseButton from './BaseButton';
 import Loading from './Loading';
-import Welcome from './Welcome';
 import ConfirmedModal from './ConfirmedModal';
 
 const PixelCast = () => {
@@ -99,25 +98,8 @@ const PixelCast = () => {
     }
   }, [isSDKLoaded]);
 
-  const addScratch = useCallback(async () => {
-    try {
-
-      const result = await sdk.actions.addFrame();
-      if (result.added) {
-        console.log(result.notificationDetails)
-      }
-
-    } catch (error) {
-      console.log(`Error: ${error}`);
-    }
-  }, []);
-
   if (!isSDKLoaded) {
     return <Loading />;
-  }
-
-  if (isSDKLoaded && !context?.client.added) {
-    return <Welcome addScratch={addScratch} />
   }
 
   // Clear canvas
