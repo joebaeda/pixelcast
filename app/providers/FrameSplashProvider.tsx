@@ -13,7 +13,7 @@ const FrameSplashProviderContext =
 function FrameSplashProvider({ children }: React.PropsWithChildren) {
   const dismiss = React.useCallback(async () => {
     sdk.actions.ready({
-      disableNativeGestures: false,
+      disableNativeGestures: true,
     });
   }, []);
 
