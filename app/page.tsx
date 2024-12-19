@@ -54,7 +54,7 @@ export default function Home() {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
               fid: fid,
-              notificationDetails: {url,token},
+              notificationDetails: { url, token },
               title: "New Pixel Art Minted!",
               body: "One Awesome Pixel Art has been minted!",
             }),
@@ -167,8 +167,7 @@ export default function Home() {
   // Handle Cast
   const handleCast = async () => {
     try {
-      setIsCastProcess(true)
-      // Show a loading state
+      setIsCastProcess(true); // Set loading state
       console.log("Saving image to IPFS...");
 
       // Save the image and retrieve the IPFS hash
@@ -177,20 +176,24 @@ export default function Home() {
       if (ipfsHash) {
         console.log("IPFS hash received:", ipfsHash);
 
-        // Cast proccess
-        const intent = `https://warpcast.com/~/compose?text=this%20is%20really%20cool%20-%20just%20created%20one!%20Frame%20by%20@joebaeda&embeds[]=https://gateway.pinata.cloud/ipfs/${ipfsHash}%20https://pixelcast.vercel.app`;
-        
-        await sdk.actions.openUrl(intent);
+        // Use a callback for the post-upload action
+        const openIntent = (hash: string) => {
+          const intent = `https://warpcast.com/~/compose?text=this%20is%20really%20cool%20-%20just%20created%20one!%20Frame%20by%20@joebaeda&embeds[]=https://gateway.pinata.cloud/ipfs/${hash}%20https://pixelcast.vercel.app`;
+          sdk.actions.openUrl(intent);
+        };
 
+        // Simulate delayed execution with a timeout (optional)
+        setTimeout(() => openIntent(ipfsHash), 500);
       } else {
         console.error("Failed to upload drawing to IPFS.");
       }
     } catch (error) {
       console.error("Error during the cast process:", error);
     } finally {
-      setIsCastProcess(false)
+      setIsCastProcess(false); // End loading state
     }
   };
+
 
 
   return (
