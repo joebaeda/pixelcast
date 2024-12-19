@@ -22,7 +22,6 @@ export default function Home() {
   const [embedHash, setEmbedHash] = useState("");
   const { fid, username, pfpUrl, url, token } = useViewer();
   const [isCastProcess, setIsCastProcess] = useState(false);
-  const [isCastSuccess, setIsCastSuccess] = useState(false);
 
   // Wagmi
   const chainId = useChainId();
@@ -45,7 +44,7 @@ export default function Home() {
 
   // Create Notifications
   useEffect(() => {
-    if (isConfirmed || isCastSuccess) {
+    if (isConfirmed) {
       // Notify user
       async function notifyUser() {
         try {
@@ -56,8 +55,8 @@ export default function Home() {
             body: JSON.stringify({
               fid: fid,
               notificationDetails: {url,token},
-              title: "Congratulations 🎉",
-              body: "One Awesome Pixel Art has been created!",
+              title: "New Pixel Art Minted!",
+              body: "One Awesome Pixel Art has been minted!",
             }),
           });
         } catch (error) {
@@ -66,7 +65,7 @@ export default function Home() {
       };
       notifyUser();
     }
-  }, [fid, isCastSuccess, isConfirmed, token, url])
+  }, [fid, isConfirmed, token, url])
 
   // Load saved art on mount
   useEffect(() => {
@@ -108,7 +107,6 @@ export default function Home() {
 
         const response = await fetch('/api/upload', {
           method: 'POST',
-          mode: 'same-origin',
           body: formData,
         });
 
@@ -178,7 +176,7 @@ export default function Home() {
         // Cast proccess
         const intent = `https://warpcast.com/~/compose?text=this%20is%20really%20cool%20-%20just%20created%20one!%20Frame%20by%20@joebaeda&embeds[]=https://gateway.pinata.cloud/ipfs/${ipfsHash}%20https://pixelcast.vercel.app`;
         
-        sdk.actions.openUrl(intent);
+        await sdk.actions.openUrl(intent);
 
       } else {
         console.error("Failed to upload drawing to IPFS.");
@@ -186,7 +184,6 @@ export default function Home() {
     } catch (error) {
       console.error("Error during the cast process:", error);
     } finally {
-      setIsCastSuccess(true)
       setIsCastProcess(false)
     }
   };
@@ -246,7 +243,7 @@ export default function Home() {
         <button
           disabled={chainId !== base.id || isConfirming || isPending}
           onClick={handleMint}
-          className="w-full sm:w-auto flex-1 p-3 rounded-xl bg-gradient-to-r from-[#4f2d61] to-[#2f1b3a] shadow-lg flex flex-row sm:justify-start justify-center items-center gap-3 hover:scale-105 transition-transform disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-purple-300"
+          className="w-full sm:w-auto flex-1 p-3 rounded-xl bg-gradient-to-r from-[#2f1b3a] to-[#4f2d61] shadow-lg flex flex-row sm:justify-start justify-center items-center gap-3 hover:scale-105 transition-transform disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-purple-300"
         >
           <BaseButton className="w-8 h-8" />
           <p className="text-white text-lg font-semibold">

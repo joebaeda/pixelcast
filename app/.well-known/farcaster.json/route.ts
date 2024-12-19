@@ -13,7 +13,7 @@ export async function GET() {
       homeUrl: "https://pixelcast.vercel.app",
       imageUrl: "https://pixelcast.vercel.app/og-image.jpg",
       buttonTitle: "Cast your Pixel!",
-      splashImageUrl: "https://pixelcast.vercel.app/splash.png",
+      splashImageUrl: "https://pixelcast.vercel.app/splash.svg",
       splashBackgroundColor: "#ede4ca",
       webhookUrl: "https://pixelcast.vercel.app/api/webhook"
     },

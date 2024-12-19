@@ -10,6 +10,7 @@ interface PixelGridProps {
 
 const PixelGrid = ({ gridSize, selectedColor, canvasRef }: PixelGridProps) => {
   const isDrawing = useRef(false)
+  const wrapperRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     const canvas = canvasRef.current
@@ -49,22 +50,15 @@ const PixelGrid = ({ gridSize, selectedColor, canvasRef }: PixelGridProps) => {
   }
 
   const handlePointerDown = (e: React.PointerEvent<HTMLCanvasElement>) => {
-    e.preventDefault() // Prevent default gestures like scrolling
+    e.preventDefault()
     isDrawing.current = true
-    const rect = e.currentTarget.getBoundingClientRect()
-    const x = e.clientX - rect.left
-    const y = e.clientY - rect.top
-
+    const { x, y } = getCanvasCoordinates(e)
     drawPixel(x, y)
   }
 
   const handlePointerMove = (e: React.PointerEvent<HTMLCanvasElement>) => {
     if (!isDrawing.current) return
-
-    const rect = e.currentTarget.getBoundingClientRect()
-    const x = e.clientX - rect.left
-    const y = e.clientY - rect.top
-
+    const { x, y } = getCanvasCoordinates(e)
     drawPixel(x, y)
   }
 
@@ -78,17 +72,34 @@ const PixelGrid = ({ gridSize, selectedColor, canvasRef }: PixelGridProps) => {
     }
   }
 
+  const getCanvasCoordinates = (e: React.PointerEvent<HTMLCanvasElement>) => {
+    const canvas = canvasRef.current
+    if (!canvas) return { x: 0, y: 0 }
+
+    const rect = canvas.getBoundingClientRect()
+    const scaleX = canvas.width / rect.width
+    const scaleY = canvas.height / rect.height
+
+    return {
+      x: (e.clientX - rect.left) * scaleX,
+      y: (e.clientY - rect.top) * scaleY
+    }
+  }
+
   return (
-    
-        <canvas
-          ref={canvasRef}
-          className="block w-full rounded-2xl max-w-[384px] max-h-[384px] aspect-square bg-gray-200 shadow-inner touch-none"
-          onPointerDown={handlePointerDown}
-          onPointerMove={handlePointerMove}
-          onPointerUp={handlePointerUp}
-          onPointerLeave={handlePointerUp}
-        />
+    <div ref={wrapperRef} className="p-4 flex justify-center items-center touch-none">
+      <canvas
+        ref={canvasRef}
+        className="block w-full max-w-[384px] aspect-square bg-gray-200 shadow-inner rounded-2xl touch-none"
+        onPointerDown={handlePointerDown}
+        onPointerMove={handlePointerMove}
+        onPointerUp={handlePointerUp}
+        onPointerLeave={handlePointerUp}
+        style={{ touchAction: 'none' }}
+      />
+    </div>
   )
 }
 
 export default PixelGrid
+

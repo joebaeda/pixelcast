@@ -1,17 +1,31 @@
 import type { Metadata } from "next";
+import localFont from "next/font/local";
 import "./globals.css";
 import Provider from "./providers/Provider";
 
+const geistSans = localFont({
+  src: "./fonts/GeistVF.woff",
+  variable: "--font-geist-sans",
+  weight: "100 900",
+});
+const geistMono = localFont({
+  src: "./fonts/GeistMonoVF.woff",
+  variable: "--font-geist-mono",
+  weight: "100 900",
+});
+
+const appUrl = "https://pixelcast.vercel.app";
+
 const frame = {
   version: "next",
-  imageUrl: "https://pixelcast.vercel.app/og-image.jpg",
+  imageUrl: `${appUrl}/og-image.jpg`,
   button: {
     title: "Cast Your Pixel",
     action: {
       type: "launch_frame",
       name: "Pixel Cast",
-      url: "https://pixelcast.vercel.app/og-image.jpg",
-      splashImageUrl: "https://pixelcast.vercel.app/splash.png",
+      url: appUrl,
+      splashImageUrl: `${appUrl}/splash.svg`,
       splashBackgroundColor: "#ede4ca",
     },
   },
@@ -59,9 +73,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className="font-sans antialiased">
+      <body className={`${geistSans.variable} ${geistMono.variable} font-sans antialiased`}>
         <Provider>
-          <main>{children}</main>
+          {children}
         </Provider>
       </body>
     </html>
