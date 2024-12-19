@@ -26,6 +26,8 @@ type FrameContextProviderContextValue = {
   fid: number;
   username: string | undefined;
   pfpUrl: string | undefined;
+  url: string | undefined;
+  token: string | undefined;
 };
 
 const FrameContextProviderContext =
@@ -73,7 +75,7 @@ function FrameContextProvider({ children }: React.PropsWithChildren) {
 
   return (
     <FrameContextProviderContext.Provider
-      value={{ fid: frameContext.user.fid, username: frameContext.user.username, pfpUrl: frameContext.user.pfpUrl }}
+      value={{ fid: frameContext.user.fid, username: frameContext.user.username, pfpUrl: frameContext.user.pfpUrl, url: frameContext.client.notificationDetails?.url, token: frameContext.client.notificationDetails?.token }}
     >
       {children}
     </FrameContextProviderContext.Provider>

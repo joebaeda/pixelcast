@@ -20,8 +20,9 @@ export default function Home() {
   const [showColorPicker, setShowColorPicker] = useState(false);
   const canvasRef = useRef<HTMLCanvasElement>(null!);
   const [embedHash, setEmbedHash] = useState("");
-  const { fid, username, pfpUrl } = useViewer();
+  const { fid, username, pfpUrl, url, token } = useViewer();
   const [isCastProcess, setIsCastProcess] = useState(false);
+  const [isCastSuccess, setIsCastSuccess] = useState(false);
 
   // Wagmi
   const chainId = useChainId();
@@ -44,17 +45,19 @@ export default function Home() {
 
   // Create Notifications
   useEffect(() => {
-    if (isConfirmed) {
+    if (isConfirmed || isCastSuccess) {
       // Notify user
       async function notifyUser() {
         try {
           await fetch('/api/send-notify', {
             method: 'POST',
+            mode: 'same-origin',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
               fid: fid,
+              notificationDetails: {url,token},
               title: "Congratulations 🎉",
-              body: "One Awesome Pixel Art has been minted!",
+              body: "One Awesome Pixel Art has been created!",
             }),
           });
         } catch (error) {
@@ -63,7 +66,7 @@ export default function Home() {
       };
       notifyUser();
     }
-  }, [fid, isConfirmed])
+  }, [fid, isCastSuccess, isConfirmed, token, url])
 
   // Load saved art on mount
   useEffect(() => {
@@ -105,6 +108,7 @@ export default function Home() {
 
         const response = await fetch('/api/upload', {
           method: 'POST',
+          mode: 'same-origin',
           body: formData,
         });
 
@@ -158,36 +162,34 @@ export default function Home() {
     }
   };
 
+  // Handle Cast
   const handleCast = async () => {
     try {
-      setIsCastProcess(true);
+      setIsCastProcess(true)
+      // Show a loading state
       console.log("Saving image to IPFS...");
 
-      // Wrap the IPFS upload in a timeout to handle potential hanging
-      const ipfsHash = await Promise.race([
-        handleSaveImage(),
-        new Promise((_, reject) => setTimeout(() => reject(new Error("IPFS upload timeout")), 30000))
-      ]);
+      // Save the image and retrieve the IPFS hash
+      const ipfsHash = await handleSaveImage();
 
       if (ipfsHash) {
         console.log("IPFS hash received:", ipfsHash);
 
-        // Wrap the Warpcast link process in a try-catch block
-        try {
-          await sdk.actions.openUrl(`https://warpcast.com/~/compose?text=this%20is%20really%20cool%20-%20just%20minted%20one!%20Frame%20by%20@joebaeda&embeds[]=https://gateway.pinata.cloud/ipfs/${ipfsHash}`);
-          console.log("Successfully linked to Warpcast");
-        } catch (warpcastError) {
-          console.error("Error linking to Warpcast:", warpcastError);
-        }
+        // Cast proccess
+        const intent = `https://warpcast.com/~/compose?text=this%20is%20really%20cool%20-%20just%20created%20one!%20Frame%20by%20@joebaeda&embeds[]=https://gateway.pinata.cloud/ipfs/${ipfsHash}%20https://pixelcast.vercel.app`;
+        
+        sdk.actions.openUrl(intent);
+
       } else {
         console.error("Failed to upload drawing to IPFS.");
       }
     } catch (error) {
       console.error("Error during the cast process:", error);
     } finally {
-      setIsCastProcess(false);
+      setIsCastSuccess(true)
+      setIsCastProcess(false)
     }
-  }
+  };
 
 
   return (
@@ -234,8 +236,6 @@ export default function Home() {
           selectedColor={selectedColor}
           canvasRef={canvasRef}
         />
-
-        <p className="font-extrabold text-lg text-center">{isPending ? "Confirming..." : isConfirming ? "Waiting..." : isConfirmed ? "Congratulations 🎉 One Awesome Pixel Art has been minted!" : ""}</p>
 
       </div>
 
