@@ -158,31 +158,36 @@ export default function Home() {
     }
   };
 
-  // Handle Cast
   const handleCast = async () => {
     try {
-      setIsCastProcess(true)
-      // Show a loading state
+      setIsCastProcess(true);
       console.log("Saving image to IPFS...");
 
-      // Save the image and retrieve the IPFS hash
-      const ipfsHash = await handleSaveImage();
+      // Wrap the IPFS upload in a timeout to handle potential hanging
+      const ipfsHash = await Promise.race([
+        handleSaveImage(),
+        new Promise((_, reject) => setTimeout(() => reject(new Error("IPFS upload timeout")), 30000))
+      ]);
 
       if (ipfsHash) {
         console.log("IPFS hash received:", ipfsHash);
 
-        // Cast proccess
-        linkToWarpcast(ipfsHash)
-
-        setIsCastProcess(false)
-
+        // Wrap the Warpcast link process in a try-catch block
+        try {
+          await sdk.actions.openUrl(`https://warpcast.com/~/compose?text=this%20is%20really%20cool%20-%20just%20minted%20one!%20Frame%20by%20@joebaeda&embeds[]=https://gateway.pinata.cloud/ipfs/${ipfsHash}`);
+          console.log("Successfully linked to Warpcast");
+        } catch (warpcastError) {
+          console.error("Error linking to Warpcast:", warpcastError);
+        }
       } else {
         console.error("Failed to upload drawing to IPFS.");
       }
     } catch (error) {
       console.error("Error during the cast process:", error);
+    } finally {
+      setIsCastProcess(false);
     }
-  };
+  }
 
 
   return (
