@@ -4,6 +4,7 @@ import { frameConnector } from "./frameConnector";
 
 export const config = createConfig({
   chains: [base],
+  ssr: true,
   connectors: [
     frameConnector(),
   ],

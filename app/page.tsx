@@ -54,7 +54,7 @@ export default function Home() {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
               fid: fid,
-              notificationDetails: { url, token },
+              notificationDetails: {url,token},
               title: "New Pixel Art Minted!",
               body: "One Awesome Pixel Art has been minted!",
             }),
@@ -107,17 +107,13 @@ export default function Home() {
 
         const response = await fetch('/api/upload', {
           method: 'POST',
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(formData),
+          body: formData,
         });
-
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
 
         const data = await response.json();
 
         if (response.ok) {
+          console.log("IPFS hash:", data.ipfsHash)
           return data.ipfsHash; // Set the IPFS hash on success
         } else {
           console.log({ message: 'Something went wrong', type: 'error' });
@@ -165,9 +161,10 @@ export default function Home() {
   };
 
   // Handle Cast
-  const handleCast = async () => {
+  /*const handleCast = async () => {
     try {
-      setIsCastProcess(true); // Set loading state
+      setIsCastProcess(true)
+      // Show a loading state
       console.log("Saving image to IPFS...");
 
       // Save the image and retrieve the IPFS hash
@@ -176,24 +173,22 @@ export default function Home() {
       if (ipfsHash) {
         console.log("IPFS hash received:", ipfsHash);
 
-        // Use a callback for the post-upload action
-        const openIntent = (hash: string) => {
-          const intent = `https://warpcast.com/~/compose?text=this%20is%20really%20cool%20-%20just%20created%20one!%20Frame%20by%20@joebaeda&embeds[]=https://gateway.pinata.cloud/ipfs/${hash}%20https://pixelcast.vercel.app`;
-          sdk.actions.openUrl(intent);
-        };
+        // Cast proccess
+        const intent = `https://warpcast.com/~/compose?text=this%20is%20really%20cool%20-%20just%20created%20one!%20Frame%20by%20@joebaeda&embeds[]=https://gateway.pinata.cloud/ipfs/${ipfsHash}%20https://pixelcast.vercel.app`;
+        
+        await sdk.actions.openUrl(intent);
 
-        // Simulate delayed execution with a timeout (optional)
-        setTimeout(() => openIntent(ipfsHash), 500);
+        setIsCastProcess(false)
+
       } else {
         console.error("Failed to upload drawing to IPFS.");
       }
     } catch (error) {
       console.error("Error during the cast process:", error);
     } finally {
-      setIsCastProcess(false); // End loading state
+      setIsCastProcess(false)
     }
-  };
-
+  };*/
 
 
   return (
@@ -261,7 +256,7 @@ export default function Home() {
         {/* Make a Cast */}
         <button
           disabled={isConfirming || isPending}
-          onClick={handleCast}
+          onClick={handleSaveImage}
           className="w-full sm:w-auto flex-1 p-3 rounded-xl bg-gradient-to-r from-[#4f2d61] to-[#30173d] shadow-lg flex flex-row sm:justify-start justify-center items-center gap-3 hover:scale-105 transition-transform disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-purple-300"
         >
           <CastButton className="w-8 h-8" />
