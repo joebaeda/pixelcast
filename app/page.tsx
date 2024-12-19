@@ -107,9 +107,13 @@ export default function Home() {
 
         const response = await fetch('/api/upload', {
           method: 'POST',
-          body: formData,
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(formData),
         });
 
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
 
         const data = await response.json();
 
