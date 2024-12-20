@@ -189,6 +189,8 @@ export default function Home() {
       }
     } catch (error) {
       console.error("Error during the cast process:", error);
+    } finally {
+      setIsCastProcess(false)
     }
   };
 
