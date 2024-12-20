@@ -24,6 +24,7 @@ export default function Home() {
   const { fid, username, pfpUrl, url, token, added } = useViewer();
   const [isCastProcess, setIsCastProcess] = useState(false);
   const [isCastSuccess, setIsCastSuccess] = useState(false);
+  const [isNotAdded, setIsNotAdded] = useState(false);
 
   // Wagmi
   const chainId = useChainId();
@@ -46,15 +47,15 @@ export default function Home() {
 
   // Add and Close Frame
 
-  const installFrame = useCallback(() => {
+  const installFrame = useCallback(async () => {
     sdk.actions.addFrame();
-  }, []);
+  },[]);
 
   const uninstallFrame = useCallback(() => {
     sdk.actions.close();
   }, []);
 
-  // Create Notifications
+  // Mint Notif
   useEffect(() => {
     if (isConfirmed) {
       // Notify user
@@ -78,6 +79,14 @@ export default function Home() {
       mintNotif();
     }
 
+  }, [fid, isCastSuccess, isConfirmed, token, url, username])
+
+  // Cast Notif
+  useEffect(() => {
+    if (!added) {
+      setIsNotAdded(true)
+    }
+
     if (isCastSuccess) {
       // Notify user
       async function castNotif() {
@@ -99,8 +108,7 @@ export default function Home() {
       };
       castNotif();
     }
-
-  }, [fid, isCastSuccess, isConfirmed, token, url, username])
+  },[added, fid, isCastSuccess, token, url, username])
 
   // Load saved art on mount
   useEffect(() => {
@@ -323,7 +331,7 @@ export default function Home() {
         <Transaction ipfs={embedHash} username={username as string} hash={hash as string} linkToBaseScan={(hash) => linkToBaseScan(hash)} linkToWarpcast={(embedHash) => linkToWarpcast(embedHash)} />
       )}
 
-      {!added && (
+      {isNotAdded && (
         <FrameModal username={username as string} installFrame={() => installFrame()} uninstallFrame={() => uninstallFrame()} />
       )}
 
