@@ -135,7 +135,7 @@ export default function Home() {
 
       // Create FormData for Pinata upload
       const formData = new FormData();
-      formData.append('file', blob, 'pixelcast.png');
+      formData.append('file', blob, `pixelcast-${fid}.png`);
       try {
 
         const response = await fetch('/api/upload', {
@@ -269,7 +269,7 @@ export default function Home() {
       </div>
 
       {/* Canvas Section */}
-      <div className="w-full p-4 flex-1 flex mx-auto mt-8 items-center justify-center">
+      <div className="w-full p-4 flex-1 flex mx-auto items-center justify-center">
 
         {/* Canvas */}
         <PixelGrid
@@ -281,7 +281,7 @@ export default function Home() {
       </div>
 
       {/* Cast & Mint Buttons Section */}
-      <div className="w-full sm:p-0 p-4 my-4 sm:max-w-[384px] mx-auto flex flex-col sm:flex-row justify-between items-center gap-4">
+      <div className="w-full sm:p-0 p-4 sm:max-w-[384px] mx-auto flex flex-col sm:flex-row justify-between items-center gap-4">
 
         {/* Mint Pixel Cast */}
         <button

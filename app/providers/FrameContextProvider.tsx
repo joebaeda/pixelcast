@@ -15,7 +15,7 @@ const FAKE_FRAME_CONTEXT: FrameContext | undefined =
         },
         client: {
           clientFid: 9152,
-          added: false,
+          added: true,
         },
         // @ts-expect-error-next-line
         fakePayload: true,
