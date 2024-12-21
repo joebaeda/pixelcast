@@ -3,9 +3,9 @@ import localFont from "next/font/local";
 import "./globals.css";
 import Provider from "./providers/Provider";
 
-const comicSans = localFont({
-  src: "./fonts/Comic-Sans-MS.ttf",
-  variable: "--font-comic-sans",
+const pixelifySans = localFont({
+  src: "./fonts/PixelifySans-VariableFont.ttf",
+  variable: "--font-pixel-sans",
   weight: "100 900",
 });
 
@@ -68,7 +68,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${comicSans.variable} antialiased`}>
+      <body className={`${pixelifySans.variable} antialiased`}>
         <Provider>
           {children}
         </Provider>

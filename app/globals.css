@@ -5,7 +5,7 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
-  --font-comic-sans: 'Comic Sans MS', sans-serif;
+  --font-pixel-sans: 'Pixelify Sans', sans-serif;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -18,5 +18,5 @@
 body {
   color: var(--foreground);
   background: var(--background);
-  font-family: var(--font-comic-sans);
+  font-family: var(--font-pixel-sans);
 }

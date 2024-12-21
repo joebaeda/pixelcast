@@ -14,7 +14,6 @@ import { Palette, Trash2 } from 'lucide-react';
 import BaseButton from './icons/BaseButton';
 import Transaction from './components/Transactions';
 import CastButton from './icons/CastButton';
-import FrameModal from './components/FrameModal';
 
 export default function Home() {
   const [selectedColor, setSelectedColor] = useState('#000000');
@@ -24,7 +23,6 @@ export default function Home() {
   const { fid, username, pfpUrl, url, token, added } = useViewer();
   const [isCastProcess, setIsCastProcess] = useState(false);
   const [isCastSuccess, setIsCastSuccess] = useState(false);
-  const [isNotAdded, setIsNotAdded] = useState(false);
 
   // Wagmi
   const chainId = useChainId();
@@ -45,15 +43,12 @@ export default function Home() {
     }
   }, []);
 
-  // Add and Close Frame
-
-  const installFrame = useCallback(async () => {
-    sdk.actions.addFrame();
-  },[]);
-
-  const uninstallFrame = useCallback(() => {
-    sdk.actions.close();
-  }, []);
+  // Open Add Frame dialog
+  useEffect(() => {
+    if (!added) {
+      sdk.actions.addFrame()
+    }
+  })
 
   // Mint Notif
   useEffect(() => {
@@ -79,14 +74,10 @@ export default function Home() {
       mintNotif();
     }
 
-  }, [fid, isCastSuccess, isConfirmed, token, url, username])
+  }, [fid, isConfirmed, token, url, username])
 
   // Cast Notif
   useEffect(() => {
-    if (!added) {
-      setIsNotAdded(true)
-    }
-
     if (isCastSuccess) {
       // Notify user
       async function castNotif() {
@@ -108,7 +99,7 @@ export default function Home() {
       };
       castNotif();
     }
-  },[added, fid, isCastSuccess, token, url, username])
+  },[fid, isCastSuccess, token, url, username])
 
   // Load saved art on mount
   useEffect(() => {
@@ -331,10 +322,6 @@ export default function Home() {
       {/* Transaction Success */}
       {isConfirmed && (
         <Transaction ipfs={embedHash} username={username as string} hash={hash as string} linkToBaseScan={(hash) => linkToBaseScan(hash)} linkToWarpcast={(embedHash) => linkToWarpcast(embedHash)} />
-      )}
-
-      {isNotAdded && (
-        <FrameModal username={username as string} installFrame={() => installFrame()} uninstallFrame={() => uninstallFrame()} />
       )}
 
     </main>
