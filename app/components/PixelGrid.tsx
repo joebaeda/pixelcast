@@ -19,7 +19,7 @@ const PixelGrid = ({ gridSize, selectedColor, canvasRef }: PixelGridProps) => {
     const ctx = canvas.getContext('2d')
     if (!ctx) return
 
-    const pixelSize = 8 // 384 / 48 = 8
+    const pixelSize = 16 // 384 / 24 = 16
     canvas.width = gridSize.width * pixelSize
     canvas.height = gridSize.height * pixelSize
 
@@ -41,7 +41,7 @@ const PixelGrid = ({ gridSize, selectedColor, canvasRef }: PixelGridProps) => {
     const ctx = canvas.getContext('2d')
     if (!ctx) return
 
-    const pixelSize = 8
+    const pixelSize = 16
     const pixelX = Math.floor(x / pixelSize) * pixelSize
     const pixelY = Math.floor(y / pixelSize) * pixelSize
 

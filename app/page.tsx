@@ -227,7 +227,7 @@ export default function Home() {
 
 
   return (
-    <main className="sm:min-h-screen bg-gray-50 min-h-[695px]">
+    <main className="sm:min-h-screen bg-gray-50 min-h-[695px] bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] [background-size:16px_16px]">
 
       {/* Header Section */}
       <div className="w-full bg-[#4f2d61] p-3 rounded-b-2xl flex flex-row justify-between">
@@ -266,7 +266,7 @@ export default function Home() {
 
         {/* Canvas */}
         <PixelGrid
-          gridSize={{ width: 48, height: 48 }}
+          gridSize={{ width: 24, height: 24 }}
           selectedColor={selectedColor}
           canvasRef={canvasRef}
         />
