@@ -1,7 +1,7 @@
-import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "../globals.css";
 import Provider from "../providers/Provider";
+import { Metadata } from "next";
 
 const pixelifySans = localFont({
     src: "../fonts/PixelifySans-VariableFont.ttf",
@@ -14,9 +14,9 @@ export const revalidate = 300;
 export async function generateMetadata({
     params,
 }: {
-    params: Promise<{ tokenId: string }>;
+    params: Promise<{ tokenId: string }>
 }): Promise<Metadata> {
-    const tokenId = params;
+    const { tokenId } = await params;
 
     try {
         // Dynamically set the og-image based on the tokenId

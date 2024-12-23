@@ -3,7 +3,7 @@
 import { useReadContract } from "wagmi";
 import Image from "next/image";
 import { pixelCastAbi, pixelCastAddress } from "@/lib/contract";
-import { useCallback, useEffect, useState } from "react";
+import { use, useCallback, useEffect, useState } from "react";
 import sdk from '@farcaster/frame-sdk';
 import { ArrowBigLeft } from "lucide-react";
 import { useViewer } from "../providers/FrameContextProvider";
@@ -18,12 +18,13 @@ const extractImageUrl = (base64Uri: string): string => {
     }
 };
 
+
 export default function TokenDetails({
     params,
 }: {
-    params: { tokenId: number }; // Ensure `tokenId` is a string
+    params: Promise<{ tokenId: string }>
 }) {
-    const tokenId = params.tokenId;
+    const { tokenId }  = use(params)
     const [tokenURIs, setTokenURIs] = useState("");
     const { username, pfpUrl } = useViewer();
 
@@ -34,7 +35,7 @@ export default function TokenDetails({
         args: [BigInt(tokenId)],
     });
 
-    const linkToOpensea = useCallback((tokenId: number) => {
+    const linkToOpensea = useCallback((tokenId: string) => {
         if (tokenId) {
             sdk.actions.openUrl(`https://opensea.io/assets/base/pixelCastAddress/${tokenId}`);
         }
