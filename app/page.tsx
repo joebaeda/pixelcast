@@ -21,8 +21,6 @@ export default function Home() {
   const canvasRef = useRef<HTMLCanvasElement>(null!);
   const [embedHash, setEmbedHash] = useState("");
   const { fid, username, pfpUrl, url, token, added } = useViewer();
-  const [isCastProcess, setIsCastProcess] = useState(false);
-  const [isCastSuccess, setIsCastSuccess] = useState(false);
 
   // Wagmi
   const chainId = useChainId();
@@ -43,6 +41,10 @@ export default function Home() {
     }
   }, []);
 
+  const closeFrame = () => {
+    sdk.actions.close();
+  }
+
   // Open Add Frame dialog
   useEffect(() => {
     if (!added) {
@@ -61,7 +63,7 @@ export default function Home() {
             mode: 'same-origin',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-              fid: fid,
+              fid: 891914,
               notificationDetails: {url,token},
               title: "New Pixel Art Minted!",
               body: `One Awesome Pixel Art by @${username} has been minted!`,
@@ -75,31 +77,6 @@ export default function Home() {
     }
 
   }, [fid, isConfirmed, token, url, username])
-
-  // Cast Notif
-  useEffect(() => {
-    if (isCastSuccess) {
-      // Notify user
-      async function castNotif() {
-        try {
-          await fetch('/api/send-notify', {
-            method: 'POST',
-            mode: 'same-origin',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              fid: fid,
-              notificationDetails: {url,token},
-              title: "New Pixel Art Created!",
-              body: `One Awesome Pixel Art by @${username} has been Created!`,
-            }),
-          });
-        } catch (error) {
-          console.error("Notification error:", error);
-        }
-      };
-      castNotif();
-    }
-  },[fid, isCastSuccess, token, url, username])
 
   // Load saved art on mount
   useEffect(() => {
@@ -153,7 +130,6 @@ export default function Home() {
   // Handle Mint
   const handleMint = async () => {
     try {
-      setIsCastProcess(true)
       // Show a loading state
       console.log("Saving image to IPFS...");
 
@@ -173,47 +149,12 @@ export default function Home() {
           args: [`ipfs://${ipfsHash}`],
         });
 
-        setIsCastProcess(false)
-
       } else {
         console.error("Failed to upload drawing to IPFS.");
       }
     } catch (error) {
       console.error("Error during the cast process:", error);
-    } finally {
-      setIsCastProcess(false)
-    }
-  };
-
-  // Handle Cast
-  const handleCast = async () => {
-    try {
-      setIsCastProcess(true)
-      // Show a loading state
-      console.log("Saving image to IPFS...");
-
-      // Save the image and retrieve the IPFS hash
-      const ipfsHash = await handleSaveImage();
-
-      if (ipfsHash) {
-        console.log("IPFS hash received:", ipfsHash);
-
-        // Cast proccess
-        const intent = `https://warpcast.com/~/compose?text=this%20is%20really%20cool%20-%20just%20created%20one!%20Frame%20by%20@joebaeda&embeds[]=https://gateway.pinata.cloud/ipfs/${ipfsHash}%20https://pixelcast.vercel.app`;
-        
-        await sdk.actions.openUrl(intent);
-
-        setIsCastProcess(false)
-        setIsCastSuccess(true)
-
-      } else {
-        console.error("Failed to upload drawing to IPFS.");
-      }
-    } catch (error) {
-      console.error("Error during the cast process:", error);
-    } finally {
-      setIsCastProcess(false)
-    }
+    } 
   };
 
   // Clear canvas
@@ -278,7 +219,7 @@ export default function Home() {
 
         {/* Mint Pixel Cast */}
         <button
-          disabled={chainId !== base.id || isCastProcess || isConfirming || isPending}
+          disabled={chainId !== base.id || isConfirming || isPending}
           onClick={handleMint}
           className="w-full sm:w-auto flex-1 p-3 rounded-xl bg-gradient-to-r from-[#2f1b3a] to-[#4f2d61] shadow-lg flex flex-row sm:justify-start justify-center items-center gap-3 hover:scale-105 transition-transform disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-purple-300"
         >
@@ -288,15 +229,15 @@ export default function Home() {
           </p>
         </button>
 
-        {/* Make a Cast */}
+        {/* Close Frame */}
         <button
-          disabled={isConfirming || isCastProcess || isPending}
-          onClick={handleCast}
+          disabled={isConfirming || isPending}
+          onClick={closeFrame}
           className="w-full sm:w-auto flex-1 p-3 rounded-xl bg-gradient-to-r from-[#4f2d61] to-[#30173d] shadow-lg flex flex-row sm:justify-start justify-center items-center gap-3 hover:scale-105 transition-transform disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-purple-300"
         >
           <CastButton className="w-8 h-8" />
           <p className="text-white text-lg font-semibold">
-            {isCastProcess ? "Process..." : "Cast"}
+            Close
           </p>
         </button>
 
