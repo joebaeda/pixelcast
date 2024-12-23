@@ -242,7 +242,7 @@ export default function Home() {
 
       </div>
 
-      {/* Cast & Mint Buttons Section */}
+      {/* Mint Buttons Section */}
       <div className="w-full sm:p-0 px-4 max-w-[384px] mx-auto flex flex-col justify-center items-center space-y-4">
 
         {/* Mint Pixel Cast and Send notif to friend */}
@@ -261,7 +261,7 @@ export default function Home() {
           onClick={handleMint}
           className="w-full p-3 rounded-xl bg-gradient-to-r from-[#2f1b3a] to-[#4f2d61] shadow-lg"
         >
-          <p className="font-semibold">
+          <p className="text-white font-semibold">
             {isPending ? "Confirming..." : isConfirming ? "Waiting..." : "Mint to Base"}
           </p>
         </button>
