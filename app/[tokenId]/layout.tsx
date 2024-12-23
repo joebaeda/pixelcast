@@ -16,7 +16,7 @@ export async function generateMetadata({
 }: {
     params: Promise<{ tokenId: string }>;
 }): Promise<Metadata> {
-    const tokenId = (await params).tokenId;
+    const { tokenId } = await params;
 
     // Dynamically set the og-image based on the tokenId
     const ogImageUrl = `https://pixelcast.vercel.app/api/og-image?tokenId=${tokenId}`;
