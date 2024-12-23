@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import PixelGrid from './components/PixelGrid';
 import Image from "next/image";
-import { useChainId, useWaitForTransactionReceipt, useWriteContract } from 'wagmi';
+import { useChainId, useReadContract, useWaitForTransactionReceipt, useWriteContract } from 'wagmi';
 import sdk from '@farcaster/frame-sdk';
 import { useViewer } from './providers/FrameContextProvider';
 import { pixelCastAbi, pixelCastAddress } from '@/lib/contract';
@@ -11,9 +11,7 @@ import { base } from 'wagmi/chains';
 import { parseEther } from 'viem';
 import { SketchPicker } from 'react-color';
 import { Palette, Trash2 } from 'lucide-react';
-import BaseButton from './icons/BaseButton';
 import Transaction from './components/Transactions';
-import CastButton from './icons/CastButton';
 
 export default function Home() {
   const [selectedColor, setSelectedColor] = useState('#000000');
@@ -21,11 +19,20 @@ export default function Home() {
   const canvasRef = useRef<HTMLCanvasElement>(null!);
   const [embedHash, setEmbedHash] = useState("");
   const { fid, username, pfpUrl, url, token, added } = useViewer();
+  const [userNames, setUserNames] = useState("");
+  const [fidNotFound, setFidNotFound] = useState<string | null>(null);
 
   // Wagmi
   const chainId = useChainId();
   const { data: hash, isPending, writeContract } = useWriteContract();
   const { isLoading: isConfirming, isSuccess: isConfirmed } = useWaitForTransactionReceipt({ hash });
+
+  // Fetch tokenId
+  const { data: tokenId } = useReadContract({
+    address: pixelCastAddress as `0x${string}`,
+    abi: pixelCastAbi,
+    functionName: "totalSupply",
+  });
 
   // Basescan
   const linkToBaseScan = useCallback((hash?: string) => {
@@ -41,10 +48,6 @@ export default function Home() {
     }
   }, []);
 
-  const closeFrame = () => {
-    sdk.actions.close();
-  }
-
   // Open Add Frame dialog
   useEffect(() => {
     if (!added) {
@@ -58,17 +61,21 @@ export default function Home() {
       // Notify user
       async function mintNotif() {
         try {
-          await fetch('/api/send-notify', {
-            method: 'POST',
-            mode: 'same-origin',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              fid: 891914,
-              notificationDetails: {url,token},
-              title: "New Pixel Art Minted!",
-              body: `One Awesome Pixel Art by @${username} has been minted!`,
-            }),
-          });
+          const fetchedFid = await userFidByUsername(userNames);
+          if (fetchedFid) {
+            await fetch('/api/send-notify', {
+              method: 'POST',
+              mode: 'same-origin',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                fid: fetchedFid,
+                notificationDetails: { url, token },
+                title: "New Pixel Art Minted!",
+                body: `@${username} has minted pixel art for you on @base network`,
+                targetUrl: `https://pixelcast.vercel.app/${Number(tokenId)}`,
+              }),
+            })
+          };
         } catch (error) {
           console.error("Notification error:", error);
         }
@@ -76,7 +83,7 @@ export default function Home() {
       mintNotif();
     }
 
-  }, [fid, isConfirmed, token, url, username])
+  }, [fid, isConfirmed, token, tokenId, url, userNames, username])
 
   // Load saved art on mount
   useEffect(() => {
@@ -90,6 +97,27 @@ export default function Home() {
       imgElement.src = savedArt;
     }
   }, []);
+
+  // Get fid by username
+  const userFidByUsername = async (userNames: string) => {
+    try {
+      const response = await fetch(`/api/fid?username=${encodeURIComponent(userNames)}`, {
+        method: 'GET',
+      });
+
+      if (!response.ok) {
+        throw new Error(`Error: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      console.log("FID fetched:", data.fid); // Log or use the fetched FID as needed
+      return data.fid;
+    } catch (error) {
+      console.error("Error fetching FID:", error);
+      setFidNotFound("User Not found")
+      return null;
+    }
+  };
 
   // Save image to IPFS
   const handleSaveImage = async () => {
@@ -154,7 +182,7 @@ export default function Home() {
       }
     } catch (error) {
       console.error("Error during the cast process:", error);
-    } 
+    }
   };
 
   // Clear canvas
@@ -215,33 +243,31 @@ export default function Home() {
       </div>
 
       {/* Cast & Mint Buttons Section */}
-      <div className="w-full sm:p-0 p-4 sm:max-w-[384px] mx-auto flex flex-col sm:flex-row justify-between items-center gap-4">
+      <div className="w-full sm:p-0 px-4 max-w-[384px] mx-auto flex flex-col justify-center items-center space-y-4">
 
-        {/* Mint Pixel Cast */}
+        {/* Mint Pixel Cast and Send notif to friend */}
+        <input
+          type="text"
+          value={userNames}
+          onChange={(e) => setUserNames(e.target.value)} // Corrected to update state with the input value
+          placeholder="Friend username"
+          className="w-full p-3 font-semibold rounded-xl text-gray-500 placeholder:opacity-25 placeholder:text-center placeholder:text-gray-500 border border-gray-300 focus:outline-none bg-gray-200"
+        />
+
+        {fidNotFound && <p className="my-2 text-gray-200">{fidNotFound}</p>} {/* Conditionally show error text */}
+
         <button
           disabled={chainId !== base.id || isConfirming || isPending}
           onClick={handleMint}
-          className="w-full sm:w-auto flex-1 p-3 rounded-xl bg-gradient-to-r from-[#2f1b3a] to-[#4f2d61] shadow-lg flex flex-row sm:justify-start justify-center items-center gap-3 hover:scale-105 transition-transform disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-purple-300"
+          className="w-full p-3 rounded-xl bg-gradient-to-r from-[#2f1b3a] to-[#4f2d61] shadow-lg"
         >
-          <BaseButton className="w-8 h-8" />
-          <p className="text-white text-lg font-semibold">
-            {isPending ? "Confirming..." : isConfirming ? "Waiting..." : "Mint"}
-          </p>
-        </button>
-
-        {/* Close Frame */}
-        <button
-          disabled={isConfirming || isPending}
-          onClick={closeFrame}
-          className="w-full sm:w-auto flex-1 p-3 rounded-xl bg-gradient-to-r from-[#4f2d61] to-[#30173d] shadow-lg flex flex-row sm:justify-start justify-center items-center gap-3 hover:scale-105 transition-transform disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-purple-300"
-        >
-          <CastButton className="w-8 h-8" />
-          <p className="text-white text-lg font-semibold">
-            Close
+          <p className="font-semibold">
+            {isPending ? "Confirming..." : isConfirming ? "Waiting..." : "Mint to Base"}
           </p>
         </button>
 
       </div>
+
 
       {showColorPicker && (
         <div className="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50">

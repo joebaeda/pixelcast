@@ -17,10 +17,12 @@ import {
     fid,
     title,
     body,
+    targetUrl,
   }: {
     fid: number;
     title: string;
     body: string;
+    targetUrl: string;
   }): Promise<SendFrameNotificationResult> {
     const notificationDetails = await getUserNotificationDetails(fid);
     if (!notificationDetails) {
@@ -36,7 +38,7 @@ import {
         notificationId: crypto.randomUUID(),
         title,
         body,
-        targetUrl: process.env.NEXT_PUBLIC_BASE_URL as string,
+        targetUrl,
         tokens: [notificationDetails.token],
       } satisfies SendNotificationRequest),
     });

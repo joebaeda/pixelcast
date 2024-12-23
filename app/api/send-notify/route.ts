@@ -9,6 +9,7 @@ const requestSchema = z.object({
   notificationDetails: notificationDetailsSchema,
   title: z.string(),
   body: z.string(),
+  targetUrl: z.string(),
 });
 
 export async function POST(request: NextRequest) {
@@ -31,6 +32,7 @@ export async function POST(request: NextRequest) {
     fid: requestBody.data.fid,
     title: requestBody.data.title,
     body: requestBody.data.body,
+    targetUrl: requestBody.data.targetUrl,
   });
 
   if (sendResult.state === "error") {
