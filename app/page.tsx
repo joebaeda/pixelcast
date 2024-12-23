@@ -42,9 +42,9 @@ export default function Home() {
   }, []);
 
   // Warpcast
-  const linkToWarpcast = useCallback((ipfs?: string) => {
-    if (ipfs) {
-      sdk.actions.openUrl(`https://warpcast.com/~/compose?text=this%20is%20really%20cool%20-%20just%20minted%20one!&embeds[]=https://gateway.pinata.cloud/ipfs/${ipfs}`);
+  const linkToWarpcast = useCallback((tokenId: string) => {
+    if (tokenId) {
+      sdk.actions.openUrl(`https://warpcast.com/~/compose?text=this%20is%20really%20cool%20-%20just%20minted%20one!&embeds[]=https://pixelcast.vercel.app/${tokenId}`);
     }
   }, []);
 
@@ -288,7 +288,7 @@ export default function Home() {
 
       {/* Transaction Success */}
       {isConfirmed && (
-        <Transaction ipfs={embedHash} username={username as string} hash={hash as string} linkToBaseScan={(hash) => linkToBaseScan(hash)} linkToWarpcast={(embedHash) => linkToWarpcast(embedHash)} />
+        <Transaction ipfs={embedHash} username={username as string} hash={hash as string} linkToBaseScan={(hash) => linkToBaseScan(hash)} linkToWarpcast={(tokenId) => linkToWarpcast(tokenId)} tokenId={String(tokenId)} />
       )}
 
     </main>

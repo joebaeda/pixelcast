@@ -37,7 +37,7 @@ export default function TokenDetails({
 
     const linkToOpensea = useCallback((tokenId: string) => {
         if (tokenId) {
-            sdk.actions.openUrl(`https://opensea.io/assets/base/pixelCastAddress/${tokenId}`);
+            sdk.actions.openUrl(`https://opensea.io/assets/base/${pixelCastAddress}/${tokenId}`);
         }
     }, []);
 

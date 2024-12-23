@@ -1,14 +1,15 @@
 import Image from "next/image";
 
 interface IConfirmed {
+    tokenId: string
     ipfs: string
     username: string
     hash: string
     linkToBaseScan: (hash: string) => void
-    linkToWarpcast: (ipfs: string) => void
+    linkToWarpcast: (tokenId: string) => void
 }
 
-const Transaction = ({ ipfs, username, hash, linkToBaseScan, linkToWarpcast }: IConfirmed) => {
+const Transaction = ({ tokenId, ipfs, username, hash, linkToBaseScan, linkToWarpcast }: IConfirmed) => {
     return (
         <div className="fixed inset-0 flex items-center justify-center z-10 bg-gray-900 bg-opacity-50">
             <div className="flex flex-col items-center bg-white rounded-2xl shadow-lg w-[90%] max-w-[360px] aspect-square p-4 space-y-5">
@@ -29,7 +30,7 @@ const Transaction = ({ ipfs, username, hash, linkToBaseScan, linkToWarpcast }: I
                     </button>
                     <button
                         className="w-full py-4 bg-purple-500 text-white text-2xl font-semibold hover:bg-purple-600 transition"
-                        onClick={() => linkToWarpcast(ipfs)}
+                        onClick={() => linkToWarpcast(tokenId)}
                     >
                         Cast
                     </button>
