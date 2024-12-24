@@ -11,7 +11,6 @@ import { base } from 'wagmi/chains';
 import { parseEther } from 'viem';
 import { SketchPicker } from 'react-color';
 import { Palette, Trash2 } from 'lucide-react';
-import Transaction from './components/Transactions';
 
 export default function Home() {
   const [selectedColor, setSelectedColor] = useState('#000000');
@@ -72,7 +71,7 @@ export default function Home() {
                 notificationDetails: { url, token },
                 title: "New Pixel Art Minted!",
                 body: `@${username} has minted pixel art for you on @base network`,
-                targetUrl: `https://pixelcast.vercel.app/${Number(tokenId)}`,
+                targetUrl: `https://pixelcast.vercel.app/${String(tokenId)}`,
               }),
             })
           };
@@ -83,7 +82,7 @@ export default function Home() {
       mintNotif();
     }
 
-  }, [fid, isConfirmed, token, tokenId, url, userNames, username])
+  }, [isConfirmed, token, tokenId, url, userNames, username])
 
   // Load saved art on mount
   useEffect(() => {
@@ -288,7 +287,32 @@ export default function Home() {
 
       {/* Transaction Success */}
       {isConfirmed && (
-        <Transaction ipfs={embedHash} username={username as string} hash={hash as string} linkToBaseScan={(hash) => linkToBaseScan(hash)} linkToWarpcast={(tokenId) => linkToWarpcast(tokenId)} tokenId={String(tokenId)} />
+        <div className="fixed inset-0 flex items-center justify-center z-10 bg-gray-900 bg-opacity-50">
+          <div className="flex flex-col items-center bg-white rounded-2xl shadow-lg w-[90%] max-w-[360px] aspect-square p-4 space-y-5">
+            <Image
+              src={`https://gateway.pinata.cloud/ipfs/${embedHash}`}
+              width={360}
+              height={360}
+              alt={`Pixel Art by ${username}`}
+              className="object-cover border border-gray-300 rounded-2xl w-full h-full"
+              priority
+            />
+            <div className="flex flex-row gap-2 w-full">
+              <button
+                className="w-full py-4 bg-blue-500 text-white text-2xl font-semibold hover:bg-blue-600 transition"
+                onClick={() => linkToBaseScan(hash)}
+              >
+                Proof
+              </button>
+              <button
+                className="w-full py-4 bg-purple-500 text-white text-2xl font-semibold hover:bg-purple-600 transition"
+                onClick={() => linkToWarpcast(String(tokenId))}
+              >
+                Cast
+              </button>
+            </div>
+          </div>
+        </div>
       )}
 
     </main>

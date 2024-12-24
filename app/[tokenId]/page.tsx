@@ -35,9 +35,9 @@ export default function TokenDetails({
         args: [BigInt(tokenId)],
     });
 
-    const linkToOpensea = useCallback((tokenId: string) => {
+    const linkToMarket = useCallback((tokenId: string) => {
         if (tokenId) {
-            sdk.actions.openUrl(`https://opensea.io/assets/base/${pixelCastAddress}/${tokenId}`);
+            sdk.actions.openUrl(`https://magiceden.io/item-details/base/${pixelCastAddress}/${tokenId}`);
         }
     }, []);
 
@@ -75,23 +75,23 @@ export default function TokenDetails({
             </div>
 
             {/* Pixel art detail */}
-            <div className="w-full p-4 flex flex-col justify-center items-center mx-auto max-w-[384px] space-y-5">
+            <div className="w-full p-4 flex flex-col justify-center items-center mx-auto max-w-[400px] space-y-5">
                 {tokenURIs ? (
                     <>
                         <Image
                             src={tokenURIs.startsWith("ipfs://")
                                 ? `https://gateway.pinata.cloud/ipfs/${tokenURIs.slice(7)}`
                                 : tokenURIs}
-                            alt={`Scratch Art ${tokenId}`}
-                            width={200}
-                            height={200}
+                            alt={`Pixel Art ${tokenId}`}
+                            width={384}
+                            height={384}
                             className="w-full max-h-[384px] p-4 bg-white rounded-2xl mx-auto"
                         />
 
 
                         <button
                             className="w-full py-4 bg-purple-500 text-white text-2xl rounded-2xl font-semibold hover:bg-purple-600 transition"
-                            onClick={() => linkToOpensea(tokenId)}
+                            onClick={() => linkToMarket(tokenId)}
                         >
                             Make Offer
                         </button>
