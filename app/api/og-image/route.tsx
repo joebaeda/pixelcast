@@ -1,7 +1,7 @@
+import { pixelCastAbi, pixelCastAddress } from '@/lib/contract';
 import { ImageResponse } from 'next/og';
 import { createPublicClient, http } from 'viem';
 import { base } from 'viem/chains';
-import { pixelCastAbi, pixelCastAddress } from '@/lib/contract'; // Update with your actual contract details
 
 export const runtime = 'edge';
 
@@ -20,115 +20,304 @@ export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const tokenId = searchParams.get('tokenId');
 
+  // Load the custom font
+  const pixelifySansData = await fetch(new URL('../../fonts/PixelifySans-Bold.ttf', import.meta.url)).then(
+    (res) => res.arrayBuffer()
+  );
+
   if (!tokenId) {
     return new ImageResponse(
       (
-        <div
-          style={{
-            display: 'flex',
-            color: 'white',
-            background: 'linear-gradient(to bottom right, #4f2d61, #2f1b3a)',
-            width: '100%',
-            height: '100%',
-            justifyContent: 'center',
-            alignItems: 'center',
-            fontSize: 24,
-            fontWeight: 'bold',
-          }}
-        >
-          Pixel Art Project
+        <div style={{
+          display: 'flex',
+          position: 'relative',
+          width: '100%',
+          height: '100%',
+          backgroundColor: '#f1f1f1',
+          backgroundSize: '30px 30px',
+          background: 'radial-gradient(#e8e1b0 10%, transparent 10%)',
+        }}>
+
+          {/* Default Image left */}
+          <div
+            style={{
+              display: 'flex',
+              position: 'relative',
+              width: '100%',
+              height: '100%',
+            }}
+          >
+
+            <div
+              style={{
+                position: 'absolute',
+                left: '25%',
+                top: '50%',
+                transform: 'translate(-25%, -50%)',
+                width: '402px',
+                height: '420px',
+                borderWidth: 10,
+                borderColor: '#e8e1b0',
+                borderRadius: '5%',
+                backgroundColor: '#d1c997',
+                backgroundImage: `url('https://pixelcast.vercel.app/splash.png')`,
+                backgroundSize: 'contain',
+                backgroundRepeat: 'no-repeat',
+              }}
+            />
+          </div>
+
+          {/* Title Right */}
+          <div
+            style={{
+              position: 'absolute',
+              display: 'flex',
+              flexDirection: 'column',
+              right: '25%',
+              top: '50%',
+              transform: 'translate(25%, -50%)',
+              width: '402px',
+              height: '392px',
+              fontSize: 92,
+              fontWeight: '700px',
+              textAlign: 'center',
+              justifyContent: 'center',
+              alignItems: 'center',
+              fontFamily: 'Comic Sans MS',
+              color: '#24231d',
+              background: 'radial-gradient(#452654 26%, transparent 10%)',
+            }}
+          >
+            <p style={{ margin: 0 }}>Pixel</p>
+            <p style={{ marginBottom: 15, marginTop: 15, color: '#f1f1f1' }}>of</p>
+            <p style={{ margin: 0 }}>Art</p>
+          </div>
+
+
         </div>
       ),
       {
-        width: 384,
-        height: 384,
+        width: 1200,
+        height: 600,
+        fonts: [
+          {
+            name: 'PixelifySans',
+            data: pixelifySansData,
+            style: 'normal',
+          },
+        ],
+        headers: {
+          "Cache-Control": "no-store",
+        },
       }
     );
   }
 
-  // Initialize the public client with viem
   const publicClient = createPublicClient({
-    chain: base, // Use the correct chain for your project
+    chain: base,
     transport: http(),
   });
 
   try {
-    // Fetch the Base64 tokenURI from the smart contract
     const tokenURI: string = await publicClient.readContract({
       address: pixelCastAddress as `0x${string}`,
       abi: pixelCastAbi,
       functionName: 'tokenURI',
-      args: [BigInt(tokenId)], // Pass the tokenId as a BigInt
+      args: [BigInt(tokenId)],
     });
 
-    // Decode the Base64 tokenURI and extract the image URL
     const imageUrl = extractImageUrl(tokenURI);
 
     if (!imageUrl) {
       throw new Error('Image URL not found in tokenURI');
     }
 
-    // Format the image URL if it's an IPFS URI
     const formattedUrl = imageUrl.startsWith('ipfs://')
       ? `https://gateway.pinata.cloud/ipfs/${imageUrl.slice(7)}`
       : imageUrl;
 
-    return new ImageResponse(
+    const pixelImage = new ImageResponse(
       (
-        <div
-          style={{
-            display: 'flex',
-            color: 'white',
-            justifyItems: 'center',
-            background: 'linear-gradient(to bottom right, #4f2d61, #2f1b3a)',
-            width: '100%',
-            height: '100%',
-            position: 'relative',
-            overflow: 'hidden',
-          }}
-        >
+        <div style={{
+          display: 'flex',
+          position: 'relative',
+          width: '100%',
+          height: '100%',
+          backgroundColor: '#f1f1f1',
+          backgroundSize: '30px 30px',
+          background: 'radial-gradient(#e8e1b0 10%, transparent 10%)',
+        }}>
+
+          {/* NFT Image left */}
           <div
             style={{
+              display: 'flex',
+              position: 'relative',
               width: '100%',
               height: '100%',
-              backgroundImage: `url(${formattedUrl})`,
-              backgroundSize: 'cover',
-              backgroundPosition: 'center',
-              transform: 'scale(1.2)',
             }}
-          />
+          >
+
+            <div
+              style={{
+                position: 'absolute',
+                left: '25%',
+                top: '50%',
+                transform: 'translate(-25%, -50%)',
+                width: '402px',
+                height: '420px',
+                borderWidth: 10,
+                borderColor: '#e8e1b0',
+                borderRadius: '5%',
+                backgroundColor: '#d1c997',
+                backgroundImage: `url(${formattedUrl})`,
+                backgroundSize: 'contain',
+                backgroundRepeat: 'no-repeat',
+              }}
+            />
+          </div>
+
+          {/* Title Right */}
+          <div
+            style={{
+              position: 'absolute',
+              display: 'flex',
+              flexDirection: 'column',
+              right: '25%',
+              top: '50%',
+              transform: 'translate(25%, -50%)',
+              width: '402px',
+              height: '392px',
+              fontSize: 92,
+              fontWeight: '700px',
+              textAlign: 'center',
+              justifyContent: 'center',
+              alignItems: 'center',
+              fontFamily: 'Comic Sans MS',
+              color: '#24231d',
+              background: 'radial-gradient(#452654 26%, transparent 10%)',
+            }}
+          >
+            <p style={{ margin: 0 }}>Pixel</p>
+            <p style={{ marginBottom: 15, marginTop: 15, color: '#f1f1f1' }}>of</p>
+            <p style={{ margin: 0 }}>Art</p>
+          </div>
+
+
         </div>
       ),
       {
-        width: 384,
-        height: 384,
+        width: 1200,
+        height: 600,
+        fonts: [
+          {
+            name: 'PixelifySans',
+            data: pixelifySansData,
+            style: 'normal',
+          },
+        ],
       }
     );
+
+    const headers = new Headers(pixelImage.headers);
+    headers.set(
+      "Cache-Control",
+      "public, s-maxage=300, stale-while-revalidate=59"
+    );
+
+    return new Response(pixelImage.body, {
+      headers,
+      status: pixelImage.status,
+      statusText: pixelImage.statusText,
+    });
+
   } catch (error) {
     console.error('Error fetching tokenURI or generating image:', error);
 
     return new ImageResponse(
       (
-        <div
-          style={{
-            display: 'flex',
-            color: 'white',
-            background: 'linear-gradient(to bottom right, #4f2d61, #2f1b3a)',
-            width: '100%',
-            height: '100%',
-            justifyContent: 'center',
-            alignItems: 'center',
-            fontSize: 24,
-            fontWeight: 'bold',
-          }}
-        >
-          Error Loading Token
+        <div style={{
+          display: 'flex',
+          position: 'relative',
+          width: '100%',
+          height: '100%',
+          backgroundColor: '#f1f1f1',
+          backgroundSize: '30px 30px',
+          background: 'radial-gradient(#e8e1b0 10%, transparent 10%)',
+        }}>
+
+          {/* Default Image left */}
+          <div
+            style={{
+              display: 'flex',
+              position: 'relative',
+              width: '100%',
+              height: '100%',
+            }}
+          >
+
+            <div
+              style={{
+                position: 'absolute',
+                left: '25%',
+                top: '50%',
+                transform: 'translate(-25%, -50%)',
+                width: '402px',
+                height: '420px',
+                borderWidth: 10,
+                borderColor: '#e8e1b0',
+                borderRadius: '5%',
+                backgroundColor: '#d1c997',
+                backgroundImage: `url('https://pixelcast.vercel.app/splash.png')`,
+                backgroundSize: 'contain',
+                backgroundRepeat: 'no-repeat',
+              }}
+            />
+          </div>
+
+          {/* Title Right */}
+          <div
+            style={{
+              position: 'absolute',
+              display: 'flex',
+              flexDirection: 'column',
+              right: '25%',
+              top: '50%',
+              transform: 'translate(25%, -50%)',
+              width: '402px',
+              height: '392px',
+              fontSize: 92,
+              fontWeight: '700px',
+              textAlign: 'center',
+              justifyContent: 'center',
+              alignItems: 'center',
+              fontFamily: 'Comic Sans MS',
+              color: '#24231d',
+            }}
+          >
+            <p style={{ margin: 0 }}>Pixel</p>
+            <p style={{ marginBottom: 15, marginTop: 15, color: '#750c08', fontSize: 102, textDecoration: 'underline' }}>Not</p>
+            <p style={{ margin: 0 }}>Found</p>
+          </div>
+
+
         </div>
       ),
       {
-        width: 384,
-        height: 384,
+        width: 1200,
+        height: 600,
+        fonts: [
+          {
+            name: 'PixelifySans',
+            data: pixelifySansData,
+            style: 'normal',
+          },
+        ],
+        headers: {
+          "Cache-Control": "no-store",
+        },
       }
     );
   }
 }
+
