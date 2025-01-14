@@ -11,6 +11,7 @@ import { base } from 'wagmi/chains';
 import { parseEther } from 'viem';
 import { SketchPicker } from 'react-color';
 import { Palette, Trash2 } from 'lucide-react';
+import SendCastButton from './components/sendCast';
 
 export default function Home() {
   const [selectedColor, setSelectedColor] = useState('#000000');
@@ -255,15 +256,18 @@ export default function Home() {
 
         {fidNotFound && <p className="my-2 text-gray-200">{fidNotFound}</p>} {/* Conditionally show error text */}
 
-        <button
-          disabled={chainId !== base.id || isConfirming || isPending}
-          onClick={handleMint}
-          className="w-full p-3 rounded-xl bg-gradient-to-r from-[#2f1b3a] to-[#4f2d61] shadow-lg"
-        >
-          <p className="text-white font-semibold">
-            {isPending ? "Confirming..." : isConfirming ? "Waiting..." : "Mint to Base"}
-          </p>
-        </button>
+        <div className="flex flex-col w-full md:flex-row gap-4 justify-center items-center">
+          <SendCastButton castText={`New masterpiece of pixel art by `} getIPFSHash={() => handleSaveImage()} castMentions={fid} />
+          <button
+            disabled={chainId !== base.id || isConfirming || isPending}
+            onClick={handleMint}
+            className="w-full p-3 rounded-xl bg-gradient-to-r from-[#2f1b3a] to-[#4f2d61] shadow-lg disabled:opacity-35 disabled:cursor-not-allowed"
+          >
+            <p className="text-white font-semibold">
+              {isPending ? "Confirming..." : isConfirming ? "Waiting..." : "Mint to Base"}
+            </p>
+          </button>
+        </div>
 
       </div>
 

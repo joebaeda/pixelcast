@@ -15,9 +15,9 @@ export default function Provider({ children }: { children: React.ReactNode }) {
       <FrameContextProvider>
         <WagmiProvider config={config}>
           <QueryClientProvider client={queryClient}>
-            {/* */}
-            {children}
-            {/* */}
+              {/* */}
+              {children}
+              {/* */}
           </QueryClientProvider>
         </WagmiProvider>
       </FrameContextProvider>
