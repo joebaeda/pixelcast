@@ -19,8 +19,6 @@ export default function Home() {
   const canvasRef = useRef<HTMLCanvasElement>(null!);
   const [embedHash, setEmbedHash] = useState("");
   const { fid, username, pfpUrl, url, token, added } = useViewer();
-  const [userNames, setUserNames] = useState("");
-  const [fidNotFound, setFidNotFound] = useState<string | null>(null);
 
   // Wagmi
   const chainId = useChainId();
@@ -61,21 +59,18 @@ export default function Home() {
       // Notify user
       async function mintNotif() {
         try {
-          const fetchedFid = await userFidByUsername(userNames);
-          if (fetchedFid) {
             await fetch('/api/send-notify', {
               method: 'POST',
               mode: 'same-origin',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({
-                fid: fetchedFid,
+                fid: 891914,
                 notificationDetails: { url, token },
                 title: "New Pixel Art Minted!",
-                body: `@${username} has minted pixel art for you on @base network`,
+                body: `@${username} has minted pixel art on @base network`,
                 targetUrl: `https://pixelcast.vercel.app/${String(tokenId)}`,
               }),
             })
-          };
         } catch (error) {
           console.error("Notification error:", error);
         }
@@ -83,7 +78,7 @@ export default function Home() {
       mintNotif();
     }
 
-  }, [isConfirmed, token, tokenId, url, userNames, username])
+  }, [isConfirmed, token, tokenId, url, username])
 
   // Load saved art on mount
   useEffect(() => {
@@ -97,27 +92,6 @@ export default function Home() {
       imgElement.src = savedArt;
     }
   }, []);
-
-  // Get fid by username
-  const userFidByUsername = async (userNames: string) => {
-    try {
-      const response = await fetch(`/api/fid?username=${encodeURIComponent(userNames)}`, {
-        method: 'GET',
-      });
-
-      if (!response.ok) {
-        throw new Error(`Error: ${response.statusText}`);
-      }
-
-      const data = await response.json();
-      console.log("FID fetched:", data.fid); // Log or use the fetched FID as needed
-      return data.fid;
-    } catch (error) {
-      console.error("Error fetching FID:", error);
-      setFidNotFound("User Not found")
-      return null;
-    }
-  };
 
   // Save image to IPFS
   const handleSaveImage = async () => {
@@ -242,33 +216,20 @@ export default function Home() {
 
       </div>
 
-      {/* Mint Buttons Section */}
-      <div className="w-full sm:p-0 px-4 max-w-[384px] mx-auto flex flex-col justify-center items-center space-y-4">
-
-        {/* Mint Pixel Cast and Send notif to friend */}
-        <input
-          type="text"
-          value={userNames}
-          onChange={(e) => setUserNames(e.target.value)} // Corrected to update state with the input value
-          placeholder="Friend username"
-          className="w-full p-3 font-semibold rounded-xl text-gray-500 placeholder:opacity-25 placeholder:text-center placeholder:text-gray-500 border border-gray-300 focus:outline-none bg-gray-200"
-        />
-
-        {fidNotFound && <p className="my-2 text-gray-200">{fidNotFound}</p>} {/* Conditionally show error text */}
-
+      {/* Mint Pixel Cast and Send notif to Dev */}
+      <div className="w-full sm:p-0 px-4 max-w-[384px] mx-auto">
         <div className="flex flex-col w-full md:flex-row gap-4 justify-center items-center">
           <SendCastButton castText={`New masterpiece of pixel art by `} getIPFSHash={() => handleSaveImage()} castMentions={fid} />
           <button
             disabled={chainId !== base.id || isConfirming || isPending}
             onClick={handleMint}
-            className="w-full p-3 rounded-xl bg-gradient-to-r from-[#2f1b3a] to-[#4f2d61] shadow-lg disabled:opacity-35 disabled:cursor-not-allowed"
+            className="w-full p-3 rounded-xl bg-gradient-to-r from-[#2f1b3a] to-[#4f2d61] shadow-lg disabled:cursor-not-allowed"
           >
             <p className="text-white font-semibold">
               {isPending ? "Confirming..." : isConfirming ? "Waiting..." : "Mint to Base"}
             </p>
           </button>
         </div>
-
       </div>
 
 

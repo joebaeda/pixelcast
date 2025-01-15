@@ -10,6 +10,7 @@ interface SendCastProps {
 
 const SendCastButton = ({ castText, castMentions, getIPFSHash }: SendCastProps) => {
     const [isSending, setIsSending] = useState(false);
+    const [isSuccess, setIsSuccess] = useState(false);
 
     const sendCast = async () => {
         if (!castText) return;
@@ -28,8 +29,11 @@ const SendCastButton = ({ castText, castMentions, getIPFSHash }: SendCastProps) 
                 body: JSON.stringify(message),
             });
 
-            if (!response.ok) {
-                throw new Error("Failed to send cast.");
+            if (response.ok) {
+                setIsSuccess(true)
+            } else {
+                setIsSuccess(false)
+                throw new Error("Failed to send cast.")
             }
 
             await response.json();
@@ -42,12 +46,12 @@ const SendCastButton = ({ castText, castMentions, getIPFSHash }: SendCastProps) 
 
     return (
         <button
-            disabled={!castText || isSending}
+            disabled={!castText || isSending || isSuccess}
             onClick={sendCast}
-            className="w-full p-3 rounded-xl bg-gradient-to-r from-[#2f1b3a] to-[#4f2d61] shadow-lg disabled:opacity-35 disabled:cursor-not-allowed"
+            className="w-full p-3 rounded-xl bg-gradient-to-r from-[#2f1b3a] to-[#4f2d61] shadow-lg disabled:cursor-not-allowed"
         >
             <p className="text-white font-semibold">
-                {isSending ? "Casting..." : "Make a Cast"}
+                {isSending ? "Casting..." : isSuccess ? "Congratulations 🎉" : "Make a Cast"}
             </p>
         </button>
     );
