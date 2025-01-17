@@ -87,7 +87,7 @@ const PixelGrid = ({ gridSize, selectedColor, canvasRef }: PixelGridProps) => {
   }
 
   return (
-    <div ref={wrapperRef} className="p-4 flex justify-center items-center touch-none">
+    <div ref={wrapperRef} className="my-3 flex justify-center items-center touch-none">
       <canvas
         ref={canvasRef}
         className="block w-full max-w-[384px] aspect-square bg-gray-200 shadow-inner rounded-2xl touch-none"

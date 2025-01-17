@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import PixelGrid from './components/PixelGrid';
 import Image from "next/image";
-import { useChainId, useReadContract, useWaitForTransactionReceipt, useWriteContract } from 'wagmi';
+import { BaseError, useChainId, useReadContract, useWaitForTransactionReceipt, useWriteContract } from 'wagmi';
 import sdk from '@farcaster/frame-sdk';
 import { useViewer } from './providers/FrameContextProvider';
 import { pixelCastAbi, pixelCastAddress } from '@/lib/contract';
@@ -12,17 +12,17 @@ import { parseEther } from 'viem';
 import { SketchPicker } from 'react-color';
 import { Palette, Trash2 } from 'lucide-react';
 import SendCastButton from './components/sendCast';
+import ShareCastButton from './components/shareCast';
 
 export default function Home() {
   const [selectedColor, setSelectedColor] = useState('#000000');
   const [showColorPicker, setShowColorPicker] = useState(false);
   const canvasRef = useRef<HTMLCanvasElement>(null!);
-  const [embedHash, setEmbedHash] = useState("");
   const { fid, username, pfpUrl, url, token, added } = useViewer();
 
   // Wagmi
   const chainId = useChainId();
-  const { data: hash, isPending, writeContract } = useWriteContract();
+  const { data: hash, error, isPending, writeContract } = useWriteContract();
   const { isLoading: isConfirming, isSuccess: isConfirmed } = useWaitForTransactionReceipt({ hash });
 
   // Fetch tokenId
@@ -39,13 +39,6 @@ export default function Home() {
     }
   }, []);
 
-  // Warpcast
-  const linkToWarpcast = useCallback((tokenId: string) => {
-    if (tokenId) {
-      sdk.actions.openUrl(`https://warpcast.com/~/compose?text=this%20is%20really%20cool%20-%20just%20minted%20one!&embeds[]=https://pixelcast.vercel.app/${tokenId}`);
-    }
-  }, []);
-
   // Open Add Frame dialog
   useEffect(() => {
     if (!added) {
@@ -59,18 +52,18 @@ export default function Home() {
       // Notify user
       async function mintNotif() {
         try {
-            await fetch('/api/send-notify', {
-              method: 'POST',
-              mode: 'same-origin',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                fid: 891914,
-                notificationDetails: { url, token },
-                title: "New Pixel Art Minted!",
-                body: `@${username} has minted pixel art on @base network`,
-                targetUrl: `https://pixelcast.vercel.app/${String(tokenId)}`,
-              }),
-            })
+          await fetch('/api/send-notify', {
+            method: 'POST',
+            mode: 'same-origin',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              fid: 891914,
+              notificationDetails: { url, token },
+              title: "New Pixel Art Minted!",
+              body: `@${username} has minted pixel art on @base network`,
+              targetUrl: `https://pixelcast.vercel.app/${Number(tokenId) + 1}`,
+            }),
+          })
         } catch (error) {
           console.error("Notification error:", error);
         }
@@ -140,7 +133,6 @@ export default function Home() {
 
       if (ipfsHash) {
         console.log("IPFS hash received:", ipfsHash);
-        setEmbedHash(ipfsHash)
 
         writeContract({
           abi: pixelCastAbi,
@@ -170,7 +162,7 @@ export default function Home() {
 
 
   return (
-    <main className="sm:min-h-screen bg-gray-50 min-h-[695px] bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] [background-size:16px_16px]">
+    <main className="bg-gray-50 min-h-screen bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] [background-size:16px_16px]">
 
       {/* Header Section */}
       <div className="w-full bg-[#4f2d61] p-3 rounded-b-2xl flex flex-row justify-between">
@@ -216,20 +208,34 @@ export default function Home() {
 
       </div>
 
-      {/* Mint Pixel Cast and Send notif to Dev */}
+      {/* Button Mint and Share area */}
       <div className="w-full sm:p-0 px-4 max-w-[384px] mx-auto">
-        <div className="flex flex-col w-full md:flex-row gap-4 justify-center items-center">
-          <SendCastButton castText={`New masterpiece of pixel art by `} getIPFSHash={() => handleSaveImage()} castMentions={fid} />
-          <button
-            disabled={chainId !== base.id || isConfirming || isPending}
-            onClick={handleMint}
-            className="w-full p-3 rounded-xl bg-gradient-to-r from-[#2f1b3a] to-[#4f2d61] shadow-lg disabled:cursor-not-allowed"
-          >
-            <p className="text-white font-semibold">
-              {isPending ? "Confirming..." : isConfirming ? "Waiting..." : "Mint to Base"}
-            </p>
-          </button>
-        </div>
+
+        {isConfirmed ? (
+          <div className="flex flex-col w-full md:flex-row gap-4 justify-center items-center">
+            <button
+              className="w-full p-3 rounded-xl bg-gradient-to-r from-[#2f1b3a] to-[#4f2d61] shadow-lg disabled:cursor-not-allowed"
+              onClick={() => linkToBaseScan(hash)}
+            >
+              Proof
+            </button>
+            <ShareCastButton castMentions={fid} tokenId={Number(tokenId) + 1} />
+          </div>
+        ) : (
+          <div className="flex flex-col w-full md:flex-row gap-4 justify-center items-center">
+            <SendCastButton castText="New masterpiece of pixel art by " getIPFSHash={() => handleSaveImage()} castMentions={fid} />
+            <button
+              disabled={chainId !== base.id || isConfirming || isPending}
+              onClick={handleMint}
+              className="w-full p-3 rounded-xl bg-gradient-to-r from-[#2f1b3a] to-[#4f2d61] shadow-lg disabled:cursor-not-allowed"
+            >
+              <p className="text-white font-semibold">
+                {isPending ? "Confirming..." : isConfirming ? "Waiting..." : "Mint to Base"}
+              </p>
+            </button>
+          </div>
+        )}
+
       </div>
 
 
@@ -250,33 +256,10 @@ export default function Home() {
         </div>
       )}
 
-      {/* Transaction Success */}
-      {isConfirmed && (
-        <div className="fixed inset-0 flex items-center justify-center z-10 bg-gray-900 bg-opacity-50">
-          <div className="flex flex-col items-center bg-white rounded-2xl shadow-lg w-[90%] max-w-[360px] aspect-square p-4 space-y-5">
-            <Image
-              src={`https://gateway.pinata.cloud/ipfs/${embedHash}`}
-              width={360}
-              height={360}
-              alt={`Pixel Art by ${username}`}
-              className="object-cover border border-gray-300 rounded-2xl w-full h-full"
-              priority
-            />
-            <div className="flex flex-row gap-2 w-full">
-              <button
-                className="w-full py-4 bg-blue-500 text-white text-2xl font-semibold hover:bg-blue-600 transition"
-                onClick={() => linkToBaseScan(hash)}
-              >
-                Proof
-              </button>
-              <button
-                className="w-full py-4 bg-purple-500 text-white text-2xl font-semibold hover:bg-purple-600 transition"
-                onClick={() => linkToWarpcast(String(tokenId))}
-              >
-                Cast
-              </button>
-            </div>
-          </div>
+      {/* Transaction Error */}
+      {error && (
+        <div className="fixed bottom-0 w-full flex justify-between shadow-md">
+          <div className="bg-red-500 p-4 text-center text-white">Error: {(error as BaseError).shortMessage || error.message}</div>
         </div>
       )}
 
