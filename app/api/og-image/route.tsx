@@ -3,8 +3,6 @@ import { ImageResponse } from 'next/og';
 import { createPublicClient, http } from 'viem';
 import { base } from 'viem/chains';
 
-export const runtime = 'edge';
-
 // Helper to decode Base64 tokenURI and extract the image URL
 const extractImageUrl = (base64Uri: string): string => {
   try {
@@ -19,11 +17,6 @@ const extractImageUrl = (base64Uri: string): string => {
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const tokenId = searchParams.get('tokenId');
-
-  // Load the custom font
-  const pixelifySansData = await fetch(new URL('../../fonts/PixelifySans-Bold.ttf', import.meta.url)).then(
-    (res) => res.arrayBuffer()
-  );
 
   if (!tokenId) {
     return new ImageResponse(
@@ -83,7 +76,7 @@ export async function GET(request: Request) {
               textAlign: 'center',
               justifyContent: 'center',
               alignItems: 'center',
-              fontFamily: 'Comic Sans MS',
+              fontFamily: 'monospace',
               color: '#24231d',
               background: 'radial-gradient(#452654 26%, transparent 10%)',
             }}
@@ -99,16 +92,7 @@ export async function GET(request: Request) {
       {
         width: 1200,
         height: 600,
-        fonts: [
-          {
-            name: 'PixelifySans',
-            data: pixelifySansData,
-            style: 'normal',
-          },
-        ],
-        headers: {
-          "Cache-Control": "no-store",
-        },
+        headers: { 'Cache-Control': 'no-store' },
       }
     );
   }
@@ -164,8 +148,8 @@ export async function GET(request: Request) {
                 left: '25%',
                 top: '50%',
                 transform: 'translate(-25%, -50%)',
-                width: '402px',
-                height: '420px',
+                width: '384px',
+                height: '384px',
                 borderWidth: 10,
                 borderColor: '#e8e1b0',
                 borderRadius: '5%',
@@ -193,7 +177,7 @@ export async function GET(request: Request) {
               textAlign: 'center',
               justifyContent: 'center',
               alignItems: 'center',
-              fontFamily: 'Comic Sans MS',
+              fontFamily: 'monospace',
               color: '#24231d',
               background: 'radial-gradient(#452654 26%, transparent 10%)',
             }}
@@ -209,13 +193,7 @@ export async function GET(request: Request) {
       {
         width: 1200,
         height: 600,
-        fonts: [
-          {
-            name: 'PixelifySans',
-            data: pixelifySansData,
-            style: 'normal',
-          },
-        ],
+        headers: { 'Cache-Control': 'no-store' },
       }
     );
 
@@ -291,7 +269,7 @@ export async function GET(request: Request) {
               textAlign: 'center',
               justifyContent: 'center',
               alignItems: 'center',
-              fontFamily: 'Comic Sans MS',
+              fontFamily: 'monospace',
               color: '#24231d',
             }}
           >
@@ -306,16 +284,7 @@ export async function GET(request: Request) {
       {
         width: 1200,
         height: 600,
-        fonts: [
-          {
-            name: 'PixelifySans',
-            data: pixelifySansData,
-            style: 'normal',
-          },
-        ],
-        headers: {
-          "Cache-Control": "no-store",
-        },
+        headers: { 'Cache-Control': 'no-store' },
       }
     );
   }
