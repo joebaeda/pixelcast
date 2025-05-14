@@ -7,7 +7,7 @@ export async function GET() {
       signature: "MHg3NGU1ODZkOGVjOGM1MjA2NjM2OGU1OTlkYTFlYTJmY2FmMWQwNzE1MzgwYmE4NGMyYTQ0MTA0MDhhMDYzYTA2MTJjYjA3ZGY3MDIwOTdlY2YxYTYwNmRjYWM2ZTdmMzIwZjZjYThjNGI1MGY0MjI2YmU0ZWM4ZTkwMTBhNGMxNzFj"
     },
     frame: {
-      version: "0.1.0",
+      version: "1",
       name: "Pixel Cast",
       iconUrl: "https://pixelcast.vercel.app/splash.png",
       homeUrl: "https://pixelcast.vercel.app",
